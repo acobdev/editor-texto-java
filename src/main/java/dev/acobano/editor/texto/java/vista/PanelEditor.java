@@ -12,7 +12,8 @@ import javax.swing.*;       //API Java para generar los componentes de la interf
 public class PanelEditor extends JPanel
 {
     //ATRIBUTOS:   
-    private JMenuBar menuHerramientas;
+    private JMenuBar barraNavegacion;
+    private JToolBar menuHerramientas;
     
     //CONSTRUCTOR:
     public PanelEditor()
@@ -24,14 +25,15 @@ public class PanelEditor extends JPanel
         this.setLayout(new GridLayout(3, 0));
         
         //Instanciamos los componentes integrantes del panel:
+        this.inicializarBarraNavegacion();
         this.inicializarMenuHerramientas();
     }
     
     //MÉTODOS DE INSTANCIACIÓN:
-    private void inicializarMenuHerramientas()
+    private void inicializarBarraNavegacion()
     {
         //Inicializamos la barra de herramientas:
-        this.menuHerramientas = new JMenuBar();
+        this.barraNavegacion = new JMenuBar();
         
         //Se crean los JMenu que estarán dentro del JMenuBar:
         JMenu archivo = new JMenu("Archivo");
@@ -39,9 +41,9 @@ public class PanelEditor extends JPanel
         JMenu herramientas = new JMenu ("Herramientas");
         
         //Se insertan los JMenu en el JMenuBar:
-        this.menuHerramientas.add(archivo);
-        this.menuHerramientas.add(edicion);
-        this.menuHerramientas.add(herramientas);
+        this.barraNavegacion.add(archivo);
+        this.barraNavegacion.add(edicion);
+        this.barraNavegacion.add(herramientas);
         
         //Se crean los JMenuItem de cada uno de los JMenu:
         //JMenuItem -> JMenu Archivo:
@@ -85,6 +87,41 @@ public class PanelEditor extends JPanel
         pegar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
         seleccionarTodo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
         
+        
+        this.add(this.barraNavegacion);
+    }
+    
+    
+    private void inicializarMenuHerramientas()
+    {
+        this.menuHerramientas = new JToolBar();
+        this.menuHerramientas.setFloatable(false);
+        this.menuHerramientas.setVisible(true);
+        
+        //Instanciamos los botones del menú:
+        JButton nuevo = new JButton(new ImageIcon("src/main/resources/icons/text.png"));
+        JButton abrir = new JButton(new ImageIcon("src/main/resources/icons/file.png"));
+        JButton guardar = new JButton(new ImageIcon("src/main/resources/icons/save.png"));
+        JButton guardarPDF = new JButton(new ImageIcon("src/main/resources/icons/pdf.png"));
+        
+        JButton deshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
+        JButton rehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
+        JButton cortar = new JButton(new ImageIcon("src/main/resources/icons/cut.png"));
+        JButton copiar = new JButton(new ImageIcon("src/main/resources/icons/copy.png"));
+        JButton pegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));
+        
+        //Pegamos estos nuevos componentes en el menú:
+        this.menuHerramientas.add(nuevo);
+        this.menuHerramientas.add(abrir);
+        this.menuHerramientas.add(guardar);
+        this.menuHerramientas.add(guardarPDF);
+        this.menuHerramientas.add(new JSeparator());
+        this.menuHerramientas.add(deshacer);
+        this.menuHerramientas.add(rehacer);
+        this.menuHerramientas.add(cortar);
+        this.menuHerramientas.add(copiar);
+        this.menuHerramientas.add(pegar);
+        this.menuHerramientas.add(new JSeparator());
         
         this.add(this.menuHerramientas);
     }
