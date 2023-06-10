@@ -27,6 +27,11 @@ public class VentanaEditor extends JFrame
         
         //Inicializamos el panel que será contenido en la ventana:
         PanelEditor panel = new PanelEditor();
+        this.add(panel);
         this.setContentPane(panel);
+        this.pack();
+        
+        //Setteamos el MenuBar por defecto del frame por el nuestro:
+        this.setJMenuBar(panel.getBarraNavegacion());
     }
 }

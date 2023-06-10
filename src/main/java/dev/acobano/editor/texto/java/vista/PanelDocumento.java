@@ -8,20 +8,20 @@ import javax.swing.*;
  * escribir dentro de su correspondiente pestaña.
  * @author Álvaro Cobano
  */
-public class PanelDocumentos extends JPanel
+public class PanelDocumento extends JPanel
 {
     //ATRIBUTOS:
     private JScrollPane barraDeslizable;
     private JTextPane documento;
     
     //CONSTRUCTOR:
-    public PanelDocumentos()
+    public PanelDocumento(JTextPane doc)
     {
         //Setteamos el layout del panel:
         this.setLayout(new BorderLayout());
         
         //Inicializamos el componente TextPane de este panel:        
-        this.documento = new JTextPane();
+        this.documento = doc;
         this.documento.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width - 24, 
                                                       Toolkit.getDefaultToolkit().getScreenSize().height - 305));
         
@@ -33,5 +33,16 @@ public class PanelDocumentos extends JPanel
         
         //Pegamos los componentes en el panel:
         this.add(this.barraDeslizable);
+    }
+    
+    //MÉTODOS 'GETTERS':
+    public JScrollPane getBarraDeslizable()
+    {
+        return this.barraDeslizable;
+    }
+    
+    public JTextPane getDocumento()
+    {
+        return this.documento;
     }
 }
