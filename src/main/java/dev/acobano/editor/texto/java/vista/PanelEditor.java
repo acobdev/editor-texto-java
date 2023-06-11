@@ -55,13 +55,13 @@ public class PanelEditor extends JPanel
         this.barraNavegacion = new JMenuBar();
         
         //Se crean los JMenu que estarán dentro del JMenuBar:
-        JMenu archivo = new JMenu("Archivo");
-        JMenu edicion = new JMenu("Edición");
+        JMenu menuArchivo = new JMenu("Archivo");
+        JMenu menuEdicion = new JMenu("Edición");
         JMenu herramientas = new JMenu ("Herramientas");
         
         //Se insertan los JMenu en el JMenuBar:
-        this.barraNavegacion.add(archivo);
-        this.barraNavegacion.add(edicion);
+        this.barraNavegacion.add(menuArchivo);
+        this.barraNavegacion.add(menuEdicion);
         this.barraNavegacion.add(herramientas);
         
         //Se crean los JMenuItem de cada uno de los JMenu:
@@ -71,27 +71,27 @@ public class PanelEditor extends JPanel
         JMenuItem guardarArchivo = new JMenuItem("Guardar como fichero de texto");
         JMenuItem guardarPDF = new JMenuItem("Guardar como archivo PDF");
         
-        archivo.add(abrirArchivo);
-        archivo.add(nuevoArchivo);
-        archivo.add(guardarArchivo);
-        archivo.add(guardarPDF);
+        menuArchivo.add(abrirArchivo);
+        menuArchivo.add(nuevoArchivo);
+        menuArchivo.add(guardarArchivo);
+        menuArchivo.add(guardarPDF);
         
         //JMenuItem -> JMenu Edición:
         JMenuItem buscar = new JMenuItem("Buscar...");
-        JMenuItem deshacer = new JMenuItem("Deshacer");
-        JMenuItem rehacer = new JMenuItem("Rehacer");
+        JMenuItem itemDeshacer = new JMenuItem("Deshacer");
+        JMenuItem itemRehacer = new JMenuItem("Rehacer");
         JMenuItem cortar = new JMenuItem("Cortar");
         JMenuItem copiar = new JMenuItem("Copiar");
         JMenuItem pegar = new JMenuItem("Pegar");
         JMenuItem seleccionarTodo = new JMenuItem("Seleccionar todo");
         
-        edicion.add(buscar);
-        edicion.add(deshacer);
-        edicion.add(rehacer);
-        edicion.add(cortar);
-        edicion.add(copiar);
-        edicion.add(pegar);
-        edicion.add(seleccionarTodo);
+        menuEdicion.add(buscar);
+        menuEdicion.add(itemDeshacer);
+        menuEdicion.add(itemRehacer);
+        menuEdicion.add(cortar);
+        menuEdicion.add(copiar);
+        menuEdicion.add(pegar);
+        menuEdicion.add(seleccionarTodo);
         
         //Les damos atajos de teclado (CTRL + tecla):
         nuevoArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
@@ -99,8 +99,8 @@ public class PanelEditor extends JPanel
         guardarArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         
         buscar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
-        deshacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
-        rehacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
+        itemDeshacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
+        itemRehacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
         cortar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK));
         copiar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
         pegar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
@@ -119,6 +119,14 @@ public class PanelEditor extends JPanel
             this.handler.guardarDocumento(this.panelPestanas);
         });
         
+        itemDeshacer.addActionListener((ActionEvent e) -> {
+            this.handler.deshacerCambios(this.panelPestanas);
+        });
+        
+        itemRehacer.addActionListener((ActionEvent e) -> {
+            this.handler.rehacerCambios(this.panelPestanas);
+        });
+        
         //Pegamos el menú en el panel:
         this.add(this.barraNavegacion);
     }
@@ -130,13 +138,13 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.setVisible(true);
         
         //Instanciamos los botones del menú:
-        JButton nuevo = new JButton(new ImageIcon("src/main/resources/icons/text.png"));
-        JButton abrir = new JButton(new ImageIcon("src/main/resources/icons/file.png"));
+        JButton btnNuevo = new JButton(new ImageIcon("src/main/resources/icons/text.png"));
+        JButton btnAbrir = new JButton(new ImageIcon("src/main/resources/icons/file.png"));
         JButton guardar = new JButton(new ImageIcon("src/main/resources/icons/save.png"));
         JButton guardarPDF = new JButton(new ImageIcon("src/main/resources/icons/pdf.png"));
         
-        JButton deshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
-        JButton rehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
+        JButton btnDeshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
+        JButton btnRehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
         JButton cortar = new JButton(new ImageIcon("src/main/resources/icons/cut.png"));
         JButton copiar = new JButton(new ImageIcon("src/main/resources/icons/copy.png"));
         JButton pegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));
@@ -156,13 +164,13 @@ public class PanelEditor extends JPanel
         JSpinner selectorTamano = new JSpinner(new SpinnerListModel(TAMANOS_FUENTE));
         
         //Pegamos estos nuevos componentes en el menú:
-        this.menuHerramientas.add(nuevo);
-        this.menuHerramientas.add(abrir);
+        this.menuHerramientas.add(btnNuevo);
+        this.menuHerramientas.add(btnAbrir);
         this.menuHerramientas.add(guardar);
         this.menuHerramientas.add(guardarPDF);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        this.menuHerramientas.add(deshacer);
-        this.menuHerramientas.add(rehacer);
+        this.menuHerramientas.add(btnDeshacer);
+        this.menuHerramientas.add(btnRehacer);
         this.menuHerramientas.add(cortar);
         this.menuHerramientas.add(copiar);
         this.menuHerramientas.add(pegar);
@@ -182,12 +190,12 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(selectorTamano);
         
         //Agregamos tooltips para cuando el usuario haga hover sobre los botones:
-        nuevo.setToolTipText("Nuevo documento (CTRL + N)");
-        abrir.setToolTipText("Abrir documento (CTRL + O)");
+        btnNuevo.setToolTipText("Nuevo documento (CTRL + N)");
+        btnAbrir.setToolTipText("Abrir documento (CTRL + O)");
         guardar.setToolTipText("Guardar como fichero de texto (CTRL + S)");
         guardarPDF.setToolTipText("Guardar como archivo PDF");        
-        deshacer.setToolTipText("Deshacer");
-        rehacer.setToolTipText("Rehacer");
+        btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
+        btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
         cortar.setToolTipText("Cortar");
         copiar.setToolTipText("Copiar");
         pegar.setToolTipText("Pegar");
@@ -205,16 +213,24 @@ public class PanelEditor extends JPanel
         selectorFuente.setToolTipText("Tipo de fuente");
         
         //Creamos los respectios eventos de botón:
-        nuevo.addActionListener((ActionEvent e) -> {
+        btnNuevo.addActionListener((ActionEvent e) -> {
             this.handler.crearNuevoDocumento(this.panelPestanas);
         });
         
-        abrir.addActionListener((ActionEvent e) -> {
+        btnAbrir.addActionListener((ActionEvent e) -> {
             this.handler.abrirDocumento(this.panelPestanas);
         });
         
         guardar.addActionListener((ActionEvent e) -> {
             this.handler.guardarDocumento(this.panelPestanas);
+        });
+        
+        btnDeshacer.addActionListener((ActionEvent e) -> {
+            this.handler.deshacerCambios(this.panelPestanas);
+        });
+        
+        btnRehacer.addActionListener((ActionEvent e) -> {
+            this.handler.rehacerCambios(this.panelPestanas);
         });
         
         cortar.addActionListener(new StyledEditorKit.CutAction());

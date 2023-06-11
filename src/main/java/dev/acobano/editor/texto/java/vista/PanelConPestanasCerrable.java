@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.undo.UndoManager;
 
 /**
  * Clase Java Swing extendida de JTabbedPane que permite instanciar pestañas
@@ -26,7 +27,10 @@ public class PanelConPestanasCerrable extends JTabbedPane
     
     
     //MÉTODOS PARA INSTANCIAR LA PESTAÑA CERRABLE:
-    public void crearPestana(String titulo, final Component componente, ArrayList<JTextPane> listaDocumentos)
+    public void crearPestana(String titulo, 
+                             final Component componente, 
+                             ArrayList<JTextPane> listaDocumentos, 
+                             ArrayList<UndoManager> listaManager)
     {
         super.addTab(titulo, componente);
         int indicePestana = listaDocumentos.size();
@@ -49,6 +53,7 @@ public class PanelConPestanasCerrable extends JTabbedPane
             this.remove(componente);
             PanelDocumento pDoc = (PanelDocumento) componente;
             listaDocumentos.remove(pDoc.getDocumento());
+            listaManager.remove(this.getSelectedIndex());
             
             if (listaDocumentos.isEmpty())
                 this.setVisible(false);
@@ -60,7 +65,12 @@ public class PanelConPestanasCerrable extends JTabbedPane
         this.setTabComponentAt(indicePestana, cabeceraPestana);
     }
 
-    public void crearPestana(String titulo, final Component componente, ArrayList<JTextPane> listaDocumentos, ArrayList<File> listaArchivosAbiertos, File f) 
+    public void crearPestana(String titulo, 
+                             final Component componente, 
+                             ArrayList<JTextPane> listaDocumentos, 
+                             ArrayList<File> listaArchivosAbiertos, 
+                             File archivo, 
+                             ArrayList<UndoManager> listaManager) 
     {
         super.addTab(titulo, componente);
         int indicePestana = listaDocumentos.size();
@@ -83,7 +93,8 @@ public class PanelConPestanasCerrable extends JTabbedPane
             removeTabAt(indicePestana);
             PanelDocumento pDoc = (PanelDocumento) componente;
             listaDocumentos.remove(pDoc.getDocumento());
-            listaArchivosAbiertos.remove(f);
+            listaManager.remove(this.getSelectedIndex());
+            listaArchivosAbiertos.remove(archivo);
             
             if (listaDocumentos.isEmpty())
                 this.setVisible(false);
@@ -98,12 +109,7 @@ public class PanelConPestanasCerrable extends JTabbedPane
         //if (!listaArchivosAbiertos.contains(f))
     }
     
-    //MÉTODO 'GETTER':
-    public String getCabecera(int indice)
-    {
-        return this.listaCabeceras.get(indice).getText();
-    }
-    
+    //MÉTODO 'GETTER':    
     public JLabel getLabel(int indice)
     {
         return this.listaCabeceras.get(indice);

@@ -15,16 +15,21 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.undo.UndoManager;
 
 /**
- *
- * @author acobano
+ * Clase Java encargada del área de gestión de eventos delegados desde la sección
+ * de 'Vista' de la aplicación. Es capaz de usar los atributos necesarios para el
+ * uso de ésta como proceso, además de poseer todos los métodos necesarios para
+ * ejecutar las acciones deseadas en el editor de texto.
+ * @author Álvaro Cobano
  */
 public class GestorEventosEditor 
 {   
     //ATRIBUTOS:
     private ArrayList<JTextPane> listaDocumentos;
     private ArrayList<File> listaArchivosAbiertos;
+    private ArrayList<UndoManager> listaManager;
     private int contador;
     
     
@@ -33,6 +38,7 @@ public class GestorEventosEditor
     {
         this.listaDocumentos = new ArrayList<>();
         this.listaArchivosAbiertos = new ArrayList<>();
+        this.listaManager = new ArrayList<>();
         this.contador = 1;
     }
     
@@ -53,15 +59,17 @@ public class GestorEventosEditor
     public void crearNuevoDocumento(PanelConPestanasCerrable panelPestanas)
     {
         JTextPane panelTexto = new JTextPane();
-        PanelDocumento doc = new PanelDocumento(panelTexto);
+        UndoManager manager = new UndoManager();
+        PanelDocumento doc = new PanelDocumento(panelTexto, manager);
         
         if (this.listaDocumentos.isEmpty())
             this.contador = 1;
         
-        panelPestanas.crearPestana("Documento " + this.contador, doc, this.listaDocumentos);
+        panelPestanas.crearPestana("Documento " + this.contador, doc, this.listaDocumentos, this.listaManager);
         panelPestanas.setSelectedIndex(this.listaDocumentos.size());
-        this.listaDocumentos.add(panelTexto);
         panelPestanas.setVisible(true);
+        this.listaDocumentos.add(panelTexto);
+        this.listaManager.add(manager);
         this.contador++;
     }
     
@@ -89,7 +97,8 @@ public class GestorEventosEditor
                 {
                     this.listaArchivosAbiertos.add(f);
                     JTextPane panelTexto = new JTextPane();
-                    PanelDocumento doc = new PanelDocumento(panelTexto);
+                    UndoManager manager = new UndoManager();
+                    PanelDocumento doc = new PanelDocumento(panelTexto, manager);
                     
                     //Empleamos un Input Stream para traer la información del archivo:
                     BufferedReader flujoEntrada = new BufferedReader(new FileReader(f.getPath()));
@@ -107,10 +116,15 @@ public class GestorEventosEditor
                         }
                     }
                                         
-                    panelPestanas.crearPestana(f.getName(), doc, this.listaDocumentos, this.listaArchivosAbiertos, f);
+                    panelPestanas.crearPestana(f.getName(), 
+                                               doc, 
+                                               this.listaDocumentos, 
+                                               this.listaArchivosAbiertos, f, 
+                                               this.listaManager);
                     panelPestanas.setSelectedIndex(this.listaDocumentos.size());
-                    listaDocumentos.add(panelTexto);
-                    panelPestanas.setVisible(true);
+                    panelPestanas.setVisible(true);                    
+                    this.listaDocumentos.add(panelTexto);
+                    this.listaManager.add(manager);
                     flujoEntrada.close();
                 }
                 else
@@ -219,5 +233,17 @@ public class GestorEventosEditor
                 Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ioe);
             }                    
         }
+    }
+    
+    public void deshacerCambios(PanelConPestanasCerrable panelPestanas)
+    {
+        if (this.listaManager.get(panelPestanas.getSelectedIndex()).canUndo())
+            this.listaManager.get(panelPestanas.getSelectedIndex()).undo();
+    }
+    
+    public void rehacerCambios(PanelConPestanasCerrable panelPestanas)
+    {
+        if (this.listaManager.get(panelPestanas.getSelectedIndex()).canRedo())
+            this.listaManager.get(panelPestanas.getSelectedIndex()).redo();
     }
 }
