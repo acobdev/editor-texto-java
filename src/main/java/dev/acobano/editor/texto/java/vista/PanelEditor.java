@@ -152,14 +152,14 @@ public class PanelEditor extends JPanel
         JButton btnNegrita = new JButton(new ImageIcon("src/main/resources/icons/bold.png"));
         JButton btnCursiva = new JButton(new ImageIcon("src/main/resources/icons/italics.png"));
         JButton btnSubrayado = new JButton(new ImageIcon("src/main/resources/icons/underlined.png"));
-        JButton resaltado = new JButton(new ImageIcon("src/main/resources/icons/marker.png"));
+        JButton btnResaltado = new JButton(new ImageIcon("src/main/resources/icons/marker.png"));
         JButton btnIzqda = new JButton(new ImageIcon("src/main/resources/icons/alignleft.png"));
         JButton btnCentro = new JButton(new ImageIcon("src/main/resources/icons/aligncenter.png"));
         JButton btnDerecha = new JButton(new ImageIcon("src/main/resources/icons/alignright.png"));
         JButton btnJustificado = new JButton(new ImageIcon("src/main/resources/icons/alignjustify.png"));
         JButton insertarImagen = new JButton(new ImageIcon("src/main/resources/icons/addimage.png"));
         
-        JButton selectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
+        JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
         JComboBox selectorFuente = new JComboBox(TIPOS_FUENTE);
         JSpinner selectorTamano = new JSpinner(new SpinnerListModel(TAMANOS_FUENTE));
         
@@ -178,14 +178,14 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(btnNegrita);
         this.menuHerramientas.add(btnCursiva);
         this.menuHerramientas.add(btnSubrayado);
-        this.menuHerramientas.add(resaltado);
+        this.menuHerramientas.add(btnResaltado);
         this.menuHerramientas.add(btnIzqda);
         this.menuHerramientas.add(btnCentro);
         this.menuHerramientas.add(btnDerecha);
         this.menuHerramientas.add(btnJustificado);
         this.menuHerramientas.add(insertarImagen);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        this.menuHerramientas.add(selectorColor);
+        this.menuHerramientas.add(btnSelectorColor);
         this.menuHerramientas.add(selectorFuente);
         this.menuHerramientas.add(selectorTamano);
         
@@ -202,13 +202,13 @@ public class PanelEditor extends JPanel
         btnNegrita.setToolTipText("Negrita");
         btnCursiva.setToolTipText("Cursiva");
         btnSubrayado.setToolTipText("Subrayado");
-        resaltado.setToolTipText("Resaltado");
+        btnResaltado.setToolTipText("Resaltado");
         btnIzqda.setToolTipText("Alinear a la izquierda");
         btnCentro.setToolTipText("Centrar");
         btnDerecha.setToolTipText("Alinear a la derecha");
         btnJustificado.setToolTipText("Justificar");
         insertarImagen.setToolTipText("Insertar nueva imagen");
-        selectorColor.setToolTipText("Color de fuente");
+        btnSelectorColor.setToolTipText("Color de fuente");
         selectorTamano.setToolTipText("Tamaño de fuente");
         selectorFuente.setToolTipText("Tipo de fuente");
         
@@ -231,6 +231,14 @@ public class PanelEditor extends JPanel
         
         btnRehacer.addActionListener((ActionEvent e) -> {
             this.handler.rehacerCambios(this.panelPestanas);
+        });
+        
+        btnSelectorColor.addActionListener((ActionEvent e) -> {
+            this.handler.cambiarColorTexto(this.panelPestanas);
+        });
+        
+        btnResaltado.addActionListener((ActionEvent e) -> {
+            this.handler.cambiarColorResaltado(this.panelPestanas);
         });
         
         btnCortar.addActionListener(new StyledEditorKit.CutAction());

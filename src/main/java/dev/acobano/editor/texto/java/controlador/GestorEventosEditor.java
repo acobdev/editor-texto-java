@@ -1,6 +1,7 @@
 package dev.acobano.editor.texto.java.controlador;
 
 import dev.acobano.editor.texto.java.vista.*;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,11 +11,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.undo.UndoManager;
 
 /**
@@ -250,5 +254,41 @@ public class GestorEventosEditor
     public void seleccionarTexto(PanelConPestanasCerrable panelPestanas)
     {
         this.listaDocumentos.get(panelPestanas.getSelectedIndex()).selectAll();
+    }
+    
+    public void cambiarColorTexto(PanelConPestanasCerrable panelPestanas)
+    {
+        //Obtenemos los atributos actuales del texto seleccionado:
+        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getCharacterAttributes());
+        
+        //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
+        Color color = JColorChooser.showDialog(null, "Elija un color para la letra", this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getSelectedTextColor());
+        
+        if (color != null)
+        {
+            //Cambiamos el color de las letras del texto:
+            StyleConstants.setForeground(atributos, color);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(panelPestanas.getSelectedIndex()).setCharacterAttributes(atributos, false);
+        }       
+    }
+    
+    public void cambiarColorResaltado(PanelConPestanasCerrable panelPestanas)
+    {
+        //Obtenemos los atributos actuales del texto seleccionado:
+        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getCharacterAttributes());
+        
+        //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
+        Color color = JColorChooser.showDialog(null, "Elija un color para el resaltado", this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getSelectedTextColor());
+        
+        if (color != null)
+        {
+            //Cambiamos el color del fondo del texto:
+            StyleConstants.setBackground(atributos, color);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(panelPestanas.getSelectedIndex()).setCharacterAttributes(atributos, false);
+        }
     }
 }
