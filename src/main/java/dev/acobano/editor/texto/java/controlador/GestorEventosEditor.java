@@ -246,4 +246,9 @@ public class GestorEventosEditor
         if (this.listaManager.get(panelPestanas.getSelectedIndex()).canRedo())
             this.listaManager.get(panelPestanas.getSelectedIndex()).redo();
     }
+    
+    public void seleccionarTexto(PanelConPestanasCerrable panelPestanas)
+    {
+        this.listaDocumentos.get(panelPestanas.getSelectedIndex()).selectAll();
+    }
 }
