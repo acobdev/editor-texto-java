@@ -1,10 +1,8 @@
 package dev.acobano.editor.texto.java.vista;
 
+import dev.acobano.editor.texto.java.controlador.GestorEventosEditor;
 import java.awt.*;          //API Java de interfaz básica (Abstract Window Toolkit)
 import java.awt.event.*;    //API Java para los eventos de la interfaz.
-import java.io.*;           //API Java encargada de los controladores entrada/salida.
-import java.util.*;         //API Java de herramientas de desarrollo.
-import java.util.logging.*; //API Java para registrar fallos del sistema (logs)
 import javax.swing.*;       //API Java para generar los componentes de la interfaz.
 import javax.swing.text.*;  //API Java para algunos eventos de botón del menú.
 
@@ -19,13 +17,12 @@ public class PanelEditor extends JPanel
     //Componentes principales:
     private JMenuBar barraNavegacion;
     private JToolBar menuHerramientas;
-    private PanelConPestanaCerrable panelPestanas;
+    private PanelConPestanasCerrable panelPestanas;
     
     //Componentes secundarios:
     
     //Atributos de uso como proceso:
-    private ArrayList<JTextPane> listaDocumentos;
-    private ArrayList<File> listaArchivosAbiertos;
+    private GestorEventosEditor handler;
     
     //CONSTANTES:
     private static final String[] TIPOS_FUENTE = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
@@ -38,19 +35,20 @@ public class PanelEditor extends JPanel
         //Hacemos que el panel se acomode al frame:
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
         
+        //Inicializamos el objeto gestor del controlador:
+        this.handler = new GestorEventosEditor();
+        
         //Instanciamos los componentes integrantes del panel:
         this.inicializarBarraNavegacion();
         this.inicializarMenuHerramientas();
         
-        this.panelPestanas = new PanelConPestanaCerrable();        
-        this.listaDocumentos = new ArrayList<>();
-        this.listaArchivosAbiertos = new ArrayList<>();
+        this.panelPestanas = new PanelConPestanasCerrable();
         this.panelPestanas.setVisible(false);
         this.add(panelPestanas);
     }
     
     
-    //MÉTODOS DE INSTANCIACIÓN:
+    //MÉTODOS PRIVADOS DE INSTANCIACIÓN:
     private void inicializarBarraNavegacion()
     {
         //Inicializamos la barra de herramientas:
@@ -96,8 +94,8 @@ public class PanelEditor extends JPanel
         edicion.add(seleccionarTodo);
         
         //Les damos atajos de teclado (CTRL + tecla):
-        abrirArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         nuevoArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
+        abrirArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         guardarArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         
         buscar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
@@ -110,11 +108,15 @@ public class PanelEditor extends JPanel
         
         //Instanciamos los eventos de click a los JMenuItems:
         nuevoArchivo.addActionListener((ActionEvent e) -> {
-            this.crearNuevoDocumento();
+            this.handler.crearNuevoDocumento(this.panelPestanas);
         });
         
         abrirArchivo.addActionListener((ActionEvent e) -> {
-            this.abrirDocumento();
+            this.handler.abrirDocumento(this.panelPestanas);
+        });
+        
+        guardarArchivo.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumento(this.panelPestanas);
         });
         
         //Pegamos el menú en el panel:
@@ -130,7 +132,6 @@ public class PanelEditor extends JPanel
         //Instanciamos los botones del menú:
         JButton nuevo = new JButton(new ImageIcon("src/main/resources/icons/text.png"));
         JButton abrir = new JButton(new ImageIcon("src/main/resources/icons/file.png"));
-        JButton eliminar = new JButton(new ImageIcon("src/main/resources/icons/delete.png"));
         JButton guardar = new JButton(new ImageIcon("src/main/resources/icons/save.png"));
         JButton guardarPDF = new JButton(new ImageIcon("src/main/resources/icons/pdf.png"));
         
@@ -157,7 +158,6 @@ public class PanelEditor extends JPanel
         //Pegamos estos nuevos componentes en el menú:
         this.menuHerramientas.add(nuevo);
         this.menuHerramientas.add(abrir);
-        this.menuHerramientas.add(eliminar);
         this.menuHerramientas.add(guardar);
         this.menuHerramientas.add(guardarPDF);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
@@ -182,10 +182,9 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(selectorTamano);
         
         //Agregamos tooltips para cuando el usuario haga hover sobre los botones:
-        nuevo.setToolTipText("Nuevo documento");
-        abrir.setToolTipText("Abrir documento");
-        eliminar.setToolTipText("Cerrar documento");
-        guardar.setToolTipText("Guardar como fichero de texto");
+        nuevo.setToolTipText("Nuevo documento (CTRL + N)");
+        abrir.setToolTipText("Abrir documento (CTRL + O)");
+        guardar.setToolTipText("Guardar como fichero de texto (CTRL + S)");
         guardarPDF.setToolTipText("Guardar como archivo PDF");        
         deshacer.setToolTipText("Deshacer");
         rehacer.setToolTipText("Rehacer");
@@ -207,11 +206,15 @@ public class PanelEditor extends JPanel
         
         //Creamos los respectios eventos de botón:
         nuevo.addActionListener((ActionEvent e) -> {
-            this.crearNuevoDocumento();
+            this.handler.crearNuevoDocumento(this.panelPestanas);
         });
         
         abrir.addActionListener((ActionEvent e) -> {
-            this.abrirDocumento();
+            this.handler.abrirDocumento(this.panelPestanas);
+        });
+        
+        guardar.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumento(this.panelPestanas);
         });
         
         cortar.addActionListener(new StyledEditorKit.CutAction());
@@ -237,85 +240,13 @@ public class PanelEditor extends JPanel
         return this.barraNavegacion;
     }
     
-    public ArrayList<JTextPane> getListaDocumentos()
+    public JToolBar getMenuHerramientas()
     {
-        return this.listaDocumentos;
+        return this.menuHerramientas;
     }
     
-    
-    //EVENTOS DE ACCIÓN:
-    private void crearNuevoDocumento()
+    public PanelConPestanasCerrable getPanelPestanas()
     {
-        JTextPane panelTexto = new JTextPane();
-        PanelDocumento doc = new PanelDocumento(panelTexto);
-        
-        this.panelPestanas.crearPestana("Documento " + (this.listaDocumentos.size() + 1), doc, this.listaDocumentos);
-        this.panelPestanas.setSelectedIndex(this.listaDocumentos.size());
-        this.listaDocumentos.add(panelTexto);
-        this.panelPestanas.setVisible(true);
-    }
-    
-    private void abrirDocumento()
-    {
-        JFileChooser selectorArchivo = new JFileChooser();
-        selectorArchivo.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        int resultado = selectorArchivo.showOpenDialog(null);
-        
-        if (resultado == JFileChooser.APPROVE_OPTION)
-        {
-            try
-            {
-                boolean existeArchivo = false;
-                File f = selectorArchivo.getSelectedFile();
-                
-                for (int i=0; i<this.listaArchivosAbiertos.size(); i++)
-                    if (this.listaArchivosAbiertos.get(i).getPath().equals(f.getPath()))
-                        existeArchivo = true;
-                
-                if (!existeArchivo)
-                {
-                    this.listaArchivosAbiertos.add(f);
-                    JTextPane panelTexto = new JTextPane();
-                    PanelDocumento doc = new PanelDocumento(panelTexto);
-                    
-                    //Empleamos un Input Stream para traer la información del archivo:
-                    BufferedReader flujoEntrada = new BufferedReader(new FileReader(f.getPath()));
-                    String linea = "";
-                    
-                    //Leemos línea a línea del archivo y lo almacenamos en el String:
-                    while (linea != null)
-                    {
-                        linea = flujoEntrada.readLine();
-                        
-                        if (linea != null)
-                        {
-                            Document d = doc.getDocumento().getDocument();
-                            d.insertString(d.getLength(), linea + "\n", null);
-                        }
-                    }
-                                        
-                    this.panelPestanas.crearPestana(f.getName(), doc, this.listaDocumentos, this.listaArchivosAbiertos, f);
-                    this.panelPestanas.setSelectedIndex(this.listaDocumentos.size());
-                    this.listaDocumentos.add(panelTexto);
-                    this.panelPestanas.setVisible(true);
-                }
-                else
-                    JOptionPane.showMessageDialog(this, 
-                                                  "El documento seleccionado ya se encuentra abierto en otra pestaña del editor.", 
-                                                  "ERROR", 
-                                                  JOptionPane.WARNING_MESSAGE);
-            }
-            catch (FileNotFoundException fnfe)
-            {
-                JOptionPane.showMessageDialog(this, 
-                                              "No se ha encontrado ningún archivo en la ruta seleccionada.", 
-                                              "ERROR", 
-                                              JOptionPane.ERROR_MESSAGE);
-            } 
-            catch (IOException | BadLocationException ex) 
-            {
-                Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        return this.panelPestanas;
     }
 }
