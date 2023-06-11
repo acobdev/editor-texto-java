@@ -14,6 +14,7 @@ public class PanelDocumento extends JPanel
     //ATRIBUTOS:
     private JScrollPane barraDeslizable;
     private JTextPane documento;
+    private TextLineNumber tln;
     
     //CONSTRUCTOR:
     public PanelDocumento(JTextPane doc, UndoManager manager)
@@ -23,7 +24,7 @@ public class PanelDocumento extends JPanel
         
         //Inicializamos el componente TextPane de este panel:        
         this.documento = doc;
-        this.documento.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width - 24, 
+        this.documento.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width - 59, 
                                                       Toolkit.getDefaultToolkit().getScreenSize().height - 305));
         
         //Inicializamos el componente Scroll de este panel:
@@ -31,6 +32,10 @@ public class PanelDocumento extends JPanel
                                                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);      
         this.barraDeslizable.setBounds(0, 0, 100, 300);
+        
+        //Inicializamos el TextLineNumber para que muestre los números de línea:
+        this.tln = new TextLineNumber(this.documento);
+        this.barraDeslizable.setRowHeaderView(this.tln);
         
         //Instanciamos el manager al panel de texto:
         this.documento.getDocument().addUndoableEditListener(manager);

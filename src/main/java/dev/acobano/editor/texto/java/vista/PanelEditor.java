@@ -145,18 +145,18 @@ public class PanelEditor extends JPanel
         
         JButton btnDeshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
         JButton btnRehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
-        JButton cortar = new JButton(new ImageIcon("src/main/resources/icons/cut.png"));
-        JButton copiar = new JButton(new ImageIcon("src/main/resources/icons/copy.png"));
-        JButton pegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));
+        JButton btnCortar = new JButton(new ImageIcon("src/main/resources/icons/cut.png"));
+        JButton btnCopiar = new JButton(new ImageIcon("src/main/resources/icons/copy.png"));
+        JButton btnPegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));
         
-        JButton negrita = new JButton(new ImageIcon("src/main/resources/icons/bold.png"));
-        JButton cursiva = new JButton(new ImageIcon("src/main/resources/icons/italics.png"));
-        JButton subrayado = new JButton(new ImageIcon("src/main/resources/icons/underlined.png"));
+        JButton btnNegrita = new JButton(new ImageIcon("src/main/resources/icons/bold.png"));
+        JButton btnCursiva = new JButton(new ImageIcon("src/main/resources/icons/italics.png"));
+        JButton btnSubrayado = new JButton(new ImageIcon("src/main/resources/icons/underlined.png"));
         JButton resaltado = new JButton(new ImageIcon("src/main/resources/icons/marker.png"));
-        JButton izquierda = new JButton(new ImageIcon("src/main/resources/icons/alignleft.png"));
-        JButton centro = new JButton(new ImageIcon("src/main/resources/icons/aligncenter.png"));
-        JButton derecha = new JButton(new ImageIcon("src/main/resources/icons/alignright.png"));
-        JButton justificado = new JButton(new ImageIcon("src/main/resources/icons/alignjustify.png"));
+        JButton btnIzqda = new JButton(new ImageIcon("src/main/resources/icons/alignleft.png"));
+        JButton btnCentro = new JButton(new ImageIcon("src/main/resources/icons/aligncenter.png"));
+        JButton btnDerecha = new JButton(new ImageIcon("src/main/resources/icons/alignright.png"));
+        JButton btnJustificado = new JButton(new ImageIcon("src/main/resources/icons/alignjustify.png"));
         JButton insertarImagen = new JButton(new ImageIcon("src/main/resources/icons/addimage.png"));
         
         JButton selectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
@@ -171,18 +171,18 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnDeshacer);
         this.menuHerramientas.add(btnRehacer);
-        this.menuHerramientas.add(cortar);
-        this.menuHerramientas.add(copiar);
-        this.menuHerramientas.add(pegar);
+        this.menuHerramientas.add(btnCortar);
+        this.menuHerramientas.add(btnCopiar);
+        this.menuHerramientas.add(btnPegar);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        this.menuHerramientas.add(negrita);
-        this.menuHerramientas.add(cursiva);
-        this.menuHerramientas.add(subrayado);
+        this.menuHerramientas.add(btnNegrita);
+        this.menuHerramientas.add(btnCursiva);
+        this.menuHerramientas.add(btnSubrayado);
         this.menuHerramientas.add(resaltado);
-        this.menuHerramientas.add(izquierda);
-        this.menuHerramientas.add(centro);
-        this.menuHerramientas.add(derecha);
-        this.menuHerramientas.add(justificado);
+        this.menuHerramientas.add(btnIzqda);
+        this.menuHerramientas.add(btnCentro);
+        this.menuHerramientas.add(btnDerecha);
+        this.menuHerramientas.add(btnJustificado);
         this.menuHerramientas.add(insertarImagen);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(selectorColor);
@@ -196,17 +196,17 @@ public class PanelEditor extends JPanel
         guardarPDF.setToolTipText("Guardar como archivo PDF");        
         btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
         btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
-        cortar.setToolTipText("Cortar");
-        copiar.setToolTipText("Copiar");
-        pegar.setToolTipText("Pegar");
-        negrita.setToolTipText("Negrita");
-        cursiva.setToolTipText("Cursiva");
-        subrayado.setToolTipText("Subrayado");
+        btnCortar.setToolTipText("Cortar");
+        btnCopiar.setToolTipText("Copiar");
+        btnPegar.setToolTipText("Pegar");
+        btnNegrita.setToolTipText("Negrita");
+        btnCursiva.setToolTipText("Cursiva");
+        btnSubrayado.setToolTipText("Subrayado");
         resaltado.setToolTipText("Resaltado");
-        izquierda.setToolTipText("Alinear a la izquierda");
-        centro.setToolTipText("Centrar");
-        derecha.setToolTipText("Alinear a la derecha");
-        justificado.setToolTipText("Justificar");
+        btnIzqda.setToolTipText("Alinear a la izquierda");
+        btnCentro.setToolTipText("Centrar");
+        btnDerecha.setToolTipText("Alinear a la derecha");
+        btnJustificado.setToolTipText("Justificar");
         insertarImagen.setToolTipText("Insertar nueva imagen");
         selectorColor.setToolTipText("Color de fuente");
         selectorTamano.setToolTipText("Tamaño de fuente");
@@ -233,17 +233,17 @@ public class PanelEditor extends JPanel
             this.handler.rehacerCambios(this.panelPestanas);
         });
         
-        cortar.addActionListener(new StyledEditorKit.CutAction());
-        copiar.addActionListener(new StyledEditorKit.CopyAction());
-        pegar.addActionListener(new StyledEditorKit.PasteAction());
+        btnCortar.addActionListener(new StyledEditorKit.CutAction());
+        btnCopiar.addActionListener(new StyledEditorKit.CopyAction());
+        btnPegar.addActionListener(new StyledEditorKit.PasteAction());
         
-        negrita.addActionListener(new StyledEditorKit.BoldAction());
-        cursiva.addActionListener(new StyledEditorKit.ItalicAction());
-        subrayado.addActionListener(new StyledEditorKit.UnderlineAction());
-        izquierda.addActionListener(new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT));
-        centro.addActionListener(new StyledEditorKit.AlignmentAction("Centro", StyleConstants.ALIGN_CENTER));
-        derecha.addActionListener(new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT));
-        justificado.addActionListener(new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED));
+        btnNegrita.addActionListener(new StyledEditorKit.BoldAction());
+        btnCursiva.addActionListener(new StyledEditorKit.ItalicAction());
+        btnSubrayado.addActionListener(new StyledEditorKit.UnderlineAction());
+        btnIzqda.addActionListener(new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT));
+        btnCentro.addActionListener(new StyledEditorKit.AlignmentAction("Centro", StyleConstants.ALIGN_CENTER));
+        btnDerecha.addActionListener(new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT));
+        btnJustificado.addActionListener(new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED));
         
         //Pegamos el JToolBar en el panel:
         this.add(this.menuHerramientas);

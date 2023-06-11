@@ -49,11 +49,11 @@ public class PanelConPestanasCerrable extends JTabbedPane
         btnCerrar.setBorderPainted(false);
         
         //Evento de botón:
-        btnCerrar.addActionListener((ActionEvent e) -> {
-            this.remove(componente);
+        btnCerrar.addActionListener((ActionEvent e) -> {            
+            listaManager.remove(this.getSelectedIndex());            
             PanelDocumento pDoc = (PanelDocumento) componente;
             listaDocumentos.remove(pDoc.getDocumento());
-            listaManager.remove(this.getSelectedIndex());
+            this.remove(componente);
             
             if (listaDocumentos.isEmpty())
                 this.setVisible(false);
@@ -89,12 +89,12 @@ public class PanelConPestanasCerrable extends JTabbedPane
         btnCerrar.setBorderPainted(false);
         
         //Evento de botón:
-        btnCerrar.addActionListener((ActionEvent e) -> {
-            removeTabAt(indicePestana);
-            PanelDocumento pDoc = (PanelDocumento) componente;
-            listaDocumentos.remove(pDoc.getDocumento());
+        btnCerrar.addActionListener((ActionEvent e) -> {            
             listaManager.remove(this.getSelectedIndex());
             listaArchivosAbiertos.remove(archivo);
+            PanelDocumento pDoc = (PanelDocumento) componente;
+            listaDocumentos.remove(pDoc.getDocumento());
+            this.remove(componente);
             
             if (listaDocumentos.isEmpty())
                 this.setVisible(false);
@@ -105,8 +105,6 @@ public class PanelConPestanasCerrable extends JTabbedPane
         cabeceraPestana.add(btnCerrar);
         
         this.setTabComponentAt(indicePestana, cabeceraPestana);
-        
-        //if (!listaArchivosAbiertos.contains(f))
     }
     
     //MÉTODO 'GETTER':    
