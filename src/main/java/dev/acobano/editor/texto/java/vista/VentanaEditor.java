@@ -1,7 +1,7 @@
 package dev.acobano.editor.texto.java.vista;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
+import java.awt.*;
+import javax.swing.*;
 
 /**
  * Clase Java engargada de instanciar la ventana o frame Swing donde 
@@ -24,6 +24,9 @@ public class VentanaEditor extends JFrame
         
         //La ventana se cerrará al presionar el botón 'X':
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        
+        //Setteamos el favicon de nuestra aplicación con una imagen personalizada:
+        this.setIconImage(new ImageIcon("src/main/resources/icons/main.png").getImage());
         
         //Inicializamos el panel que será contenido en la ventana:
         PanelEditor panel = new PanelEditor();
