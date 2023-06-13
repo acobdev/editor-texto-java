@@ -239,30 +239,30 @@ public class GestorEventosEditor
         }
     }
     
-    public void deshacerCambios(PanelConPestanasCerrable panelPestanas)
+    public void deshacerCambios(int indice)
     {
-        if (this.listaManager.get(panelPestanas.getSelectedIndex()).canUndo())
-            this.listaManager.get(panelPestanas.getSelectedIndex()).undo();
+        if (this.listaManager.get(indice).canUndo())
+            this.listaManager.get(indice).undo();
     }
     
-    public void rehacerCambios(PanelConPestanasCerrable panelPestanas)
+    public void rehacerCambios(int indice)
     {
-        if (this.listaManager.get(panelPestanas.getSelectedIndex()).canRedo())
-            this.listaManager.get(panelPestanas.getSelectedIndex()).redo();
+        if (this.listaManager.get(indice).canRedo())
+            this.listaManager.get(indice).redo();
     }
     
-    public void seleccionarTexto(PanelConPestanasCerrable panelPestanas)
+    public void seleccionarTexto(int indice)
     {
-        this.listaDocumentos.get(panelPestanas.getSelectedIndex()).selectAll();
+        this.listaDocumentos.get(indice).selectAll();
     }
     
-    public void cambiarColorTexto(PanelConPestanasCerrable panelPestanas)
+    public void cambiarColorTexto(int indice)
     {
         //Obtenemos los atributos actuales del texto seleccionado:
-        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getCharacterAttributes());
+        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
         
         //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
-        Color color = JColorChooser.showDialog(null, "Elija un color para la letra", this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getSelectedTextColor());
+        Color color = JColorChooser.showDialog(null, "Elija un color para la letra", this.listaDocumentos.get(indice).getSelectedTextColor());
         
         if (color != null)
         {
@@ -270,17 +270,27 @@ public class GestorEventosEditor
             StyleConstants.setForeground(atributos, color);
 
             //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(panelPestanas.getSelectedIndex()).setCharacterAttributes(atributos, false);
-        }       
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocusInWindow();
+        }
+        else
+            JOptionPane.showMessageDialog(null,
+                                          "No ha seleccionado ningún color de la paleta para cambiar el color de la letra.",
+                                          "AVISO",
+                                          JOptionPane.INFORMATION_MESSAGE);
     }
     
-    public void cambiarColorResaltado(PanelConPestanasCerrable panelPestanas)
+    public void cambiarColorResaltado(int indice)
     {
         //Obtenemos los atributos actuales del texto seleccionado:
-        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getCharacterAttributes());
+        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
         
         //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
-        Color color = JColorChooser.showDialog(null, "Elija un color para el resaltado", this.listaDocumentos.get(panelPestanas.getSelectedIndex()).getSelectedTextColor());
+        Color color = JColorChooser.showDialog(null, 
+                                               "Elija un color para el resaltado", 
+                                               this.listaDocumentos.get(indice).getSelectedTextColor());
         
         if (color != null)
         {
@@ -288,7 +298,86 @@ public class GestorEventosEditor
             StyleConstants.setBackground(atributos, color);
 
             //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(panelPestanas.getSelectedIndex()).setCharacterAttributes(atributos, false);
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocusInWindow();
+        }else
+            JOptionPane.showMessageDialog(null,
+                                          "No ha seleccionado ningún color de la paleta para cambiar el color del resaltado.",
+                                          "AVISO",
+                                          JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    public void cambiarFuente(int indice, Object valorSeleccionado)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+
+            //Cambiamos la familia de la fuente del texto:
+            StyleConstants.setFontFamily(atributos, String.valueOf(valorSeleccionado));
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocusInWindow();
+        }        
+    }
+    
+    public void cambiarTamanoFuente(int indice, Object valorSeleccionado)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+
+            //Cambiamos el tamaño de la fuente del texto:
+            StyleConstants.setFontSize(atributos, Integer.parseInt(String.valueOf(valorSeleccionado)));
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocusInWindow();
+        }
+    }
+    
+    public void escribirSuperindice(int indice)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+
+            //Creamos el estilo de superindice para el texto:
+            StyleConstants.setSuperscript(atributos, true);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocusInWindow();
+        }
+    }
+    
+    public void escribirSubindice(int indice)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+
+            //Creamos el estilo de subindice para el texto:
+            StyleConstants.setSubscript(atributos, true);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocusInWindow();
         }
     }
 }

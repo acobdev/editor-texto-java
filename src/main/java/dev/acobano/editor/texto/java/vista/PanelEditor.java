@@ -4,6 +4,7 @@ import dev.acobano.editor.texto.java.controlador.GestorEventosEditor;
 import java.awt.*;          //API Java de interfaz básica (Abstract Window Toolkit)
 import java.awt.event.*;    //API Java para los eventos de la interfaz.
 import javax.swing.*;       //API Java para generar los componentes de la interfaz.
+import javax.swing.event.*; //API Java para el evento 'ChangeListener' del JSpinner.
 import javax.swing.text.*;  //API Java para algunos eventos de botón del menú.
 
 /**
@@ -41,10 +42,8 @@ public class PanelEditor extends JPanel
         //Instanciamos los componentes integrantes del panel:
         this.inicializarBarraNavegacion();
         this.inicializarMenuHerramientas();
-        
-        this.panelPestanas = new PanelConPestanasCerrable();
-        this.panelPestanas.setVisible(false);
-        this.add(panelPestanas);
+        this.inicializarPanelPestanas();
+        this.inicializarLayoutPanel();
     }
     
     
@@ -120,15 +119,12 @@ public class PanelEditor extends JPanel
         });
         
         itemDeshacer.addActionListener((ActionEvent e) -> {
-            this.handler.deshacerCambios(this.panelPestanas);
+            this.handler.deshacerCambios(this.panelPestanas.getSelectedIndex());
         });
         
         itemRehacer.addActionListener((ActionEvent e) -> {
-            this.handler.rehacerCambios(this.panelPestanas);
+            this.handler.rehacerCambios(this.panelPestanas.getSelectedIndex());
         });
-        
-        //Pegamos el menú en el panel:
-        this.add(this.barraNavegacion);
     }
         
     private void inicializarMenuHerramientas()
@@ -141,7 +137,7 @@ public class PanelEditor extends JPanel
         JButton btnNuevo = new JButton(new ImageIcon("src/main/resources/icons/text.png"));
         JButton btnAbrir = new JButton(new ImageIcon("src/main/resources/icons/file.png"));
         JButton guardar = new JButton(new ImageIcon("src/main/resources/icons/save.png"));
-        JButton guardarPDF = new JButton(new ImageIcon("src/main/resources/icons/pdf.png"));
+        //JButton guardarPDF = new JButton(new ImageIcon("src/main/resources/icons/pdf.png"));
         
         JButton btnDeshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
         JButton btnRehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
@@ -157,17 +153,25 @@ public class PanelEditor extends JPanel
         JButton btnCentro = new JButton(new ImageIcon("src/main/resources/icons/aligncenter.png"));
         JButton btnDerecha = new JButton(new ImageIcon("src/main/resources/icons/alignright.png"));
         JButton btnJustificado = new JButton(new ImageIcon("src/main/resources/icons/alignjustify.png"));
-        JButton insertarImagen = new JButton(new ImageIcon("src/main/resources/icons/addimage.png"));
+        JButton btnSubindice = new JButton(new ImageIcon("src/main/resources/icons/subscript.png"));
+        JButton btnSuperindice = new JButton(new ImageIcon("src/main/resources/icons/superscript.png"));
+        //JButton insertarImagen = new JButton(new ImageIcon("src/main/resources/icons/addimage.png"));
         
         JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
         JComboBox selectorFuente = new JComboBox(TIPOS_FUENTE);
         JSpinner selectorTamano = new JSpinner(new SpinnerListModel(TAMANOS_FUENTE));
+        selectorTamano.setPreferredSize(new Dimension(this.menuHerramientas.getSize()));
         
-        //Pegamos estos nuevos componentes en el menú:
+        //Pegamos estos nuevos componentes en el menú:       
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
+        this.menuHerramientas.add(selectorFuente);
+        this.menuHerramientas.add(selectorTamano);
+        this.menuHerramientas.add(btnSelectorColor);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnNuevo);
         this.menuHerramientas.add(btnAbrir);
         this.menuHerramientas.add(guardar);
-        this.menuHerramientas.add(guardarPDF);
+        //this.menuHerramientas.add(guardarPDF);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnDeshacer);
         this.menuHerramientas.add(btnRehacer);
@@ -178,22 +182,23 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(btnNegrita);
         this.menuHerramientas.add(btnCursiva);
         this.menuHerramientas.add(btnSubrayado);
+        this.menuHerramientas.add(btnSubindice);
+        this.menuHerramientas.add(btnSuperindice);
         this.menuHerramientas.add(btnResaltado);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnIzqda);
         this.menuHerramientas.add(btnCentro);
         this.menuHerramientas.add(btnDerecha);
-        this.menuHerramientas.add(btnJustificado);
-        this.menuHerramientas.add(insertarImagen);
+        this.menuHerramientas.add(btnJustificado);       
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        this.menuHerramientas.add(btnSelectorColor);
-        this.menuHerramientas.add(selectorFuente);
-        this.menuHerramientas.add(selectorTamano);
+        //this.menuHerramientas.add(insertarImagen);
+        
         
         //Agregamos tooltips para cuando el usuario haga hover sobre los botones:
         btnNuevo.setToolTipText("Nuevo documento (CTRL + N)");
         btnAbrir.setToolTipText("Abrir documento (CTRL + O)");
         guardar.setToolTipText("Guardar como fichero de texto (CTRL + S)");
-        guardarPDF.setToolTipText("Guardar como archivo PDF");        
+        //guardarPDF.setToolTipText("Guardar como archivo PDF");        
         btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
         btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
         btnCortar.setToolTipText("Cortar");
@@ -203,11 +208,13 @@ public class PanelEditor extends JPanel
         btnCursiva.setToolTipText("Cursiva");
         btnSubrayado.setToolTipText("Subrayado");
         btnResaltado.setToolTipText("Resaltado");
+        btnSubindice.setToolTipText("Subíndice");
+        btnSuperindice.setToolTipText("Superíndice");
         btnIzqda.setToolTipText("Alinear a la izquierda");
         btnCentro.setToolTipText("Centrar");
         btnDerecha.setToolTipText("Alinear a la derecha");
         btnJustificado.setToolTipText("Justificar");
-        insertarImagen.setToolTipText("Insertar nueva imagen");
+        //insertarImagen.setToolTipText("Insertar nueva imagen");
         btnSelectorColor.setToolTipText("Color de fuente");
         selectorTamano.setToolTipText("Tamaño de fuente");
         selectorFuente.setToolTipText("Tipo de fuente");
@@ -226,19 +233,27 @@ public class PanelEditor extends JPanel
         });
         
         btnDeshacer.addActionListener((ActionEvent e) -> {
-            this.handler.deshacerCambios(this.panelPestanas);
+            this.handler.deshacerCambios(this.panelPestanas.getSelectedIndex());
         });
         
         btnRehacer.addActionListener((ActionEvent e) -> {
-            this.handler.rehacerCambios(this.panelPestanas);
+            this.handler.rehacerCambios(this.panelPestanas.getSelectedIndex());
+        });
+        
+        btnSubindice.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSubindice(this.panelPestanas.getSelectedIndex());
+        });
+        
+        btnSuperindice.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSuperindice(this.panelPestanas.getSelectedIndex());
         });
         
         btnSelectorColor.addActionListener((ActionEvent e) -> {
-            this.handler.cambiarColorTexto(this.panelPestanas);
+            this.handler.cambiarColorTexto(this.panelPestanas.getSelectedIndex());
         });
         
         btnResaltado.addActionListener((ActionEvent e) -> {
-            this.handler.cambiarColorResaltado(this.panelPestanas);
+            this.handler.cambiarColorResaltado(this.panelPestanas.getSelectedIndex());
         });
         
         btnCortar.addActionListener(new StyledEditorKit.CutAction());
@@ -253,8 +268,34 @@ public class PanelEditor extends JPanel
         btnDerecha.addActionListener(new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT));
         btnJustificado.addActionListener(new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED));
         
-        //Pegamos el JToolBar en el panel:
-        this.add(this.menuHerramientas);
+        selectorFuente.addItemListener((ItemEvent ie) -> {
+            this.handler.cambiarFuente(this.panelPestanas.getSelectedIndex(), selectorFuente.getSelectedItem());
+        });
+        
+        selectorTamano.addChangeListener((ChangeEvent ce) -> {
+            this.handler.cambiarTamanoFuente(this.panelPestanas.getSelectedIndex(), selectorTamano.getValue());
+        });
+    }
+    
+    private void inicializarPanelPestanas()
+    {
+        int alturaPanel = Toolkit.getDefaultToolkit().getScreenSize().height -
+                          this.barraNavegacion.getHeight() -
+                          this.menuHerramientas.getHeight();
+        int anchuraPanel = Toolkit.getDefaultToolkit().getScreenSize().width;
+        this.panelPestanas = new PanelConPestanasCerrable();
+        this.panelPestanas.setVisible(false);
+        this.panelPestanas.setSize(anchuraPanel, alturaPanel);
+    }
+    
+    private void inicializarLayoutPanel()
+    {
+        //Creamos un nuevo objeto para definir el layout:
+        this.setLayout(new BorderLayout());
+        
+        //Pegamos los componentes definidos en los anteriores métodos en el panel:
+        this.add(this.menuHerramientas, BorderLayout.NORTH);
+        this.add(this.panelPestanas, BorderLayout.CENTER);
     }
     
     

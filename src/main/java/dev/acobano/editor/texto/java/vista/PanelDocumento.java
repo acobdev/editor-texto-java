@@ -24,21 +24,21 @@ public class PanelDocumento extends JPanel
         
         //Inicializamos el componente TextPane de este panel:        
         this.documento = doc;
-        this.documento.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width - 59, 
-                                                      Toolkit.getDefaultToolkit().getScreenSize().height - 305));
+        
+        //Instanciamos el manager al panel de texto:
+        this.documento.getDocument().addUndoableEditListener(manager);
+    
+        //Ponemos el foco en el documento para mejor UX:
+        this.documento.requestFocusInWindow();
         
         //Inicializamos el componente Scroll de este panel:
         this.barraDeslizable = new JScrollPane(documento, 
                                                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                               JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);      
-        this.barraDeslizable.setBounds(0, 0, 100, 300);
+                                               JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
         //Inicializamos el TextLineNumber para que muestre los números de línea:
         this.tln = new TextLineNumber(this.documento);
         this.barraDeslizable.setRowHeaderView(this.tln);
-        
-        //Instanciamos el manager al panel de texto:
-        this.documento.getDocument().addUndoableEditListener(manager);
         
         //Pegamos los componentes en el panel:
         this.add(this.barraDeslizable);
