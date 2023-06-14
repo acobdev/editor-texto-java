@@ -16,6 +16,8 @@ public class PanelConPestanasCerrable extends JTabbedPane
 {  
     //ATRIBUTO:
     private ArrayList<JLabel> listaCabeceras;
+    private ArrayList<JLabel> listaDatosCursor;
+    private ArrayList<JLabel> listaDatosDocumento;
     
     
     //CONSTRUCTOR:
@@ -23,6 +25,8 @@ public class PanelConPestanasCerrable extends JTabbedPane
     {
         super();
         this.listaCabeceras = new ArrayList<>();
+        this.listaDatosCursor = new ArrayList<>();
+        this.listaDatosDocumento = new ArrayList<>();
     }
     
     
@@ -30,7 +34,8 @@ public class PanelConPestanasCerrable extends JTabbedPane
     public void crearPestana(String titulo, 
                              final Component componente, 
                              ArrayList<JTextPane> listaDocumentos, 
-                             ArrayList<UndoManager> listaManager)
+                             ArrayList<UndoManager> listaManager,
+                             JPanel piePagina)
     {
         super.addTab(titulo, componente);
         int indicePestana = listaDocumentos.size();
@@ -38,6 +43,7 @@ public class PanelConPestanasCerrable extends JTabbedPane
         JPanel cabeceraPestana = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         cabeceraPestana.setOpaque(false);
         this.setTabPlacement(JTabbedPane.TOP);
+        piePagina.setVisible(true);
         
         //Diseñamos la cabecera de la pestaña para que sea cerrable:
         JLabel etqTitulo = new JLabel(titulo);
@@ -49,14 +55,18 @@ public class PanelConPestanasCerrable extends JTabbedPane
         btnCerrar.setBorderPainted(false);
         
         //Evento de botón:
-        btnCerrar.addActionListener((ActionEvent e) -> {            
+        btnCerrar.addActionListener((ActionEvent e) -> {
+            this.listaCabeceras.remove(this.getSelectedIndex());
             listaManager.remove(this.getSelectedIndex());            
-            PanelDocumento pDoc = (PanelDocumento) componente;
-            listaDocumentos.remove(pDoc.getDocumento());
+            PanelDocumento pDocBorrar = (PanelDocumento) componente;
+            listaDocumentos.remove(pDocBorrar.getDocumento());
             this.remove(componente);
             
             if (listaDocumentos.isEmpty())
+            {                
                 this.setVisible(false);
+                piePagina.setVisible(false);
+            }
         });
         
         //Inserción de los componentes en el panel:
@@ -70,7 +80,8 @@ public class PanelConPestanasCerrable extends JTabbedPane
                              ArrayList<JTextPane> listaDocumentos, 
                              ArrayList<File> listaArchivosAbiertos, 
                              File archivo, 
-                             ArrayList<UndoManager> listaManager) 
+                             ArrayList<UndoManager> listaManager,
+                             JPanel piePagina) 
     {
         super.addTab(titulo, componente);
         int indicePestana = listaDocumentos.size();
@@ -78,6 +89,7 @@ public class PanelConPestanasCerrable extends JTabbedPane
         JPanel cabeceraPestana = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         cabeceraPestana.setOpaque(false);
         this.setTabPlacement(JTabbedPane.TOP);
+        piePagina.setVisible(true);
         
         //Diseñamos la cabecera de la pestaña para que sea cerrable:
         JLabel etqTitulo = new JLabel(titulo);
@@ -97,7 +109,10 @@ public class PanelConPestanasCerrable extends JTabbedPane
             this.remove(componente);
             
             if (listaDocumentos.isEmpty())
+            {
                 this.setVisible(false);
+                piePagina.setVisible(false);
+            }
         });
         
         //Inserción de los componentes en el panel:
@@ -108,7 +123,7 @@ public class PanelConPestanasCerrable extends JTabbedPane
     }
     
     //MÉTODO 'GETTER':    
-    public JLabel getLabel(int indice)
+    public JLabel getLabelCabecera(int indice)
     {
         return this.listaCabeceras.get(indice);
     }

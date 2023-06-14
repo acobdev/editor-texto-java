@@ -19,8 +19,10 @@ public class PanelEditor extends JPanel
     private JMenuBar barraNavegacion;
     private JToolBar menuHerramientas;
     private PanelConPestanasCerrable panelPestanas;
+    private JPanel piePagina;
     
     //Componentes secundarios:
+    private JLabel etqCursor, etqDocumento;
     
     //Atributos de uso como proceso:
     private GestorEventosEditor handler;
@@ -40,6 +42,7 @@ public class PanelEditor extends JPanel
         this.handler = new GestorEventosEditor();
         
         //Instanciamos los componentes integrantes del panel:
+        this.inicializarPiePagina();
         this.inicializarBarraNavegacion();
         this.inicializarMenuHerramientas();
         this.inicializarPanelPestanas();
@@ -107,11 +110,11 @@ public class PanelEditor extends JPanel
         
         //Instanciamos los eventos de click a los JMenuItems:
         nuevoArchivo.addActionListener((ActionEvent e) -> {
-            this.handler.crearNuevoDocumento(this.panelPestanas);
+            this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
         });
         
         abrirArchivo.addActionListener((ActionEvent e) -> {
-            this.handler.abrirDocumento(this.panelPestanas);
+            this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
         });
         
         guardarArchivo.addActionListener((ActionEvent e) -> {
@@ -160,7 +163,7 @@ public class PanelEditor extends JPanel
         JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
         JComboBox selectorFuente = new JComboBox(TIPOS_FUENTE);
         JSpinner selectorTamano = new JSpinner(new SpinnerListModel(TAMANOS_FUENTE));
-        selectorTamano.setPreferredSize(new Dimension(this.menuHerramientas.getSize()));
+        selectorTamano.setPreferredSize(new Dimension(46, 64));
         
         //Pegamos estos nuevos componentes en el menú:       
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
@@ -221,11 +224,11 @@ public class PanelEditor extends JPanel
         
         //Creamos los respectios eventos de botón:
         btnNuevo.addActionListener((ActionEvent e) -> {
-            this.handler.crearNuevoDocumento(this.panelPestanas);
+            this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
         });
         
         btnAbrir.addActionListener((ActionEvent e) -> {
-            this.handler.abrirDocumento(this.panelPestanas);
+            this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
         });
         
         guardar.addActionListener((ActionEvent e) -> {
@@ -277,11 +280,27 @@ public class PanelEditor extends JPanel
         });
     }
     
+    
+    private void inicializarPiePagina()
+    {
+        //Inicializamos los componentes:
+        this.piePagina = new JPanel();
+        this.etqCursor = new JLabel();
+        this.etqDocumento = new JLabel();
+        
+        this.piePagina.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width, 30));
+        this.piePagina.setLayout(new BorderLayout());
+        this.piePagina.add(etqCursor, BorderLayout.WEST);
+        this.piePagina.add(etqDocumento, BorderLayout.EAST);
+        this.piePagina.setVisible(false);
+    }
+    
     private void inicializarPanelPestanas()
     {
         int alturaPanel = Toolkit.getDefaultToolkit().getScreenSize().height -
                           this.barraNavegacion.getHeight() -
-                          this.menuHerramientas.getHeight();
+                          this.menuHerramientas.getHeight() -
+                          this.piePagina.getHeight();
         int anchuraPanel = Toolkit.getDefaultToolkit().getScreenSize().width;
         this.panelPestanas = new PanelConPestanasCerrable();
         this.panelPestanas.setVisible(false);
@@ -296,6 +315,7 @@ public class PanelEditor extends JPanel
         //Pegamos los componentes definidos en los anteriores métodos en el panel:
         this.add(this.menuHerramientas, BorderLayout.NORTH);
         this.add(this.panelPestanas, BorderLayout.CENTER);
+        this.add(this.piePagina, BorderLayout.SOUTH);
     }
     
     
