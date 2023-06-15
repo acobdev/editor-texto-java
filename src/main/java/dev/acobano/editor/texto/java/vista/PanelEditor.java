@@ -20,12 +20,16 @@ public class PanelEditor extends JPanel
     private JToolBar menuHerramientas;
     private PanelConPestanasCerrable panelPestanas;
     private JPanel piePagina;
+    private JPopupMenu menuContextual;
     
     //Componentes secundarios:
     private JLabel etqCursor, etqDocumento;
+    JComboBox selectorFuente;
+    JSpinner selectorTamano;
     
     //Atributos de uso como proceso:
     private GestorEventosEditor handler;
+    
     
     //CONSTANTES:
     private static final String[] TIPOS_FUENTE = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
@@ -42,11 +46,12 @@ public class PanelEditor extends JPanel
         this.handler = new GestorEventosEditor();
         
         //Instanciamos los componentes integrantes del panel:
-        this.inicializarPiePagina();
-        this.inicializarBarraNavegacion();
+        this.inicializarPiePagina();        
         this.inicializarMenuHerramientas();
+        this.inicializarBarraNavegacion();
         this.inicializarPanelPestanas();
         this.inicializarLayoutPanel();
+        this.inicializarMenuContextual();
     }
     
     
@@ -111,10 +116,13 @@ public class PanelEditor extends JPanel
         //Instanciamos los eventos de click a los JMenuItems:
         nuevoArchivo.addActionListener((ActionEvent e) -> {
             this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
+            this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setComponentPopupMenu(this.menuContextual);
+            this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setFont(new Font(String.valueOf(this.selectorFuente.getSelectedItem()), Font.PLAIN, (Integer) this.selectorTamano.getValue()));
         });
         
         abrirArchivo.addActionListener((ActionEvent e) -> {
             this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
+            this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setComponentPopupMenu(this.menuContextual);
         });
         
         guardarArchivo.addActionListener((ActionEvent e) -> {
@@ -161,8 +169,8 @@ public class PanelEditor extends JPanel
         //JButton insertarImagen = new JButton(new ImageIcon("src/main/resources/icons/addimage.png"));
         
         JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
-        JComboBox selectorFuente = new JComboBox(TIPOS_FUENTE);
-        JSpinner selectorTamano = new JSpinner(new SpinnerListModel(TAMANOS_FUENTE));
+        this.selectorFuente = new JComboBox(TIPOS_FUENTE);
+        this.selectorTamano = new JSpinner(new SpinnerListModel(TAMANOS_FUENTE));
         selectorTamano.setPreferredSize(new Dimension(46, 64));
         
         //Pegamos estos nuevos componentes en el menú:       
@@ -204,9 +212,9 @@ public class PanelEditor extends JPanel
         //guardarPDF.setToolTipText("Guardar como archivo PDF");        
         btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
         btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
-        btnCortar.setToolTipText("Cortar");
-        btnCopiar.setToolTipText("Copiar");
-        btnPegar.setToolTipText("Pegar");
+        btnCortar.setToolTipText("Cortar (CTRL + X)");
+        btnCopiar.setToolTipText("Copiar (CTRL + C)");
+        btnPegar.setToolTipText("Pegar (CTRL + V)");
         btnNegrita.setToolTipText("Negrita");
         btnCursiva.setToolTipText("Cursiva");
         btnSubrayado.setToolTipText("Subrayado");
@@ -316,6 +324,85 @@ public class PanelEditor extends JPanel
         this.add(this.menuHerramientas, BorderLayout.NORTH);
         this.add(this.panelPestanas, BorderLayout.CENTER);
         this.add(this.piePagina, BorderLayout.SOUTH);
+    }
+    
+    private void inicializarMenuContextual()
+    {
+        //Inicializamos el componente JPopupMenu:
+        this.menuContextual = new JPopupMenu();
+        
+        //Instanciamos los JMenuItem que estarán dentro del JPopupMenu:
+        //JMenuItem 'Tipo de letra':
+        JMenu menuTipoLetra = new JMenu("Tipo de fuente...");        
+        for (String s : TIPOS_FUENTE)
+        {
+            JMenuItem itemFuente = new JMenuItem(s);
+            itemFuente.addActionListener((ActionEvent e) -> {
+                this.handler.cambiarFuente(this.panelPestanas.getSelectedIndex(), s);
+            });
+            menuTipoLetra.add(itemFuente);
+        }
+        
+        //JMenuItem 'Tamaño de fuente':
+        JMenu menuTamano = new JMenu("Tamaño de fuente...");
+        for (Integer i : TAMANOS_FUENTE)
+        {
+            JMenuItem itemTamano = new JMenuItem(String.valueOf(i));
+            itemTamano.addActionListener((ActionEvent e) -> {
+                this.handler.cambiarTamanoFuente(this.panelPestanas.getSelectedIndex(), i);
+            });
+            menuTamano.add(itemTamano);
+        }
+        
+        //JMenuItem 'Estilos':
+        JMenu menuEstilo = new JMenu("Estilo...");
+        JMenuItem itemNegrita = new JMenuItem("Negrita");
+        JMenuItem itemCursiva = new JMenuItem("Cursiva");
+        JMenuItem itemSubrayado = new JMenuItem("Subrayado");
+        JMenuItem itemSubindice = new JMenuItem("Subíndice");
+        JMenuItem itemSuperindice = new JMenuItem("Superíndice");
+        
+        itemNegrita.addActionListener(new StyledEditorKit.BoldAction());
+        itemCursiva.addActionListener(new StyledEditorKit.ItalicAction());
+        itemSubrayado.addActionListener(new StyledEditorKit.UnderlineAction());
+        
+        itemSubindice.addActionListener((ActionEvent e) -> {
+                this.handler.escribirSubindice(this.panelPestanas.getSelectedIndex());
+            });
+        
+        itemSuperindice.addActionListener((ActionEvent e) -> {
+                this.handler.escribirSuperindice(this.panelPestanas.getSelectedIndex());
+            });
+        
+        menuEstilo.add(itemNegrita);
+        menuEstilo.add(itemCursiva);
+        menuEstilo.add(itemSubrayado);
+        menuEstilo.add(new JSeparator(JSeparator.HORIZONTAL));
+        menuEstilo.add(itemSubindice);
+        menuEstilo.add(itemSuperindice);
+        
+        //JMenuItem 'Alineación':
+        JMenu menuAlineacion = new JMenu("Alineación...");
+        JMenuItem itemIzqda = new JMenuItem("Izquierda");
+        JMenuItem itemDcha = new JMenuItem("Derecha");
+        JMenuItem itemCentro = new JMenuItem("Centrado");
+        JMenuItem itemJustificado = new JMenuItem("Justificado");
+        
+        itemIzqda.addActionListener(new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT));
+        itemCentro.addActionListener(new StyledEditorKit.AlignmentAction("Centro", StyleConstants.ALIGN_CENTER));
+        itemDcha.addActionListener(new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT));
+        itemJustificado.addActionListener(new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED));
+        
+        menuAlineacion.add(itemIzqda);
+        menuAlineacion.add(itemDcha);
+        menuAlineacion.add(itemCentro);
+        menuAlineacion.add(itemJustificado);
+        
+        //Insertamos los JMenuItem en el JPopupMenu:
+        this.menuContextual.add(menuTipoLetra);
+        this.menuContextual.add(menuTamano);
+        this.menuContextual.add(menuEstilo);
+        this.menuContextual.add(menuAlineacion);
     }
     
     
