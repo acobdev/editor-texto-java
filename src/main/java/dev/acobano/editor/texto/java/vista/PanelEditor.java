@@ -1,6 +1,6 @@
 package dev.acobano.editor.texto.java.vista;
 
-import dev.acobano.editor.texto.java.controlador.GestorEventosEditor;
+import dev.acobano.editor.texto.java.controlador.*;
 import java.awt.*;          //API Java de interfaz básica (Abstract Window Toolkit)
 import java.awt.event.*;    //API Java para los eventos de la interfaz.
 import javax.swing.*;       //API Java para generar los componentes de la interfaz.
@@ -24,8 +24,8 @@ public class PanelEditor extends JPanel
     
     //Componentes secundarios:
     private JLabel etqCursor, etqDocumento;
-    JComboBox selectorFuente;
-    JSpinner selectorTamano;
+    private JComboBox selectorFuente;
+    private JSpinner selectorTamano;
     
     //Atributos de uso como proceso:
     private GestorEventosEditor handler;
@@ -75,43 +75,57 @@ public class PanelEditor extends JPanel
         //JMenuItem -> JMenu Archivo:
         JMenuItem abrirArchivo = new JMenuItem("Abrir documento");
         JMenuItem nuevoArchivo = new JMenuItem("Nuevo documento");
-        JMenuItem guardarArchivo = new JMenuItem("Guardar como fichero de texto");
-        JMenuItem guardarPDF = new JMenuItem("Guardar como archivo PDF");
+        JMenu menuGuardar = new JMenu("Guardar...");
+        JMenuItem itemGuardarTXT = new JMenuItem("Guardar como fichero TXT");
+        JMenuItem itemGuardarRTF = new JMenuItem("Guardar como fichero RTF");
+        JMenuItem itemGuardarPDF = new JMenuItem("Guardar como fichero PDF");
+        JMenuItem itemGuardarDOC = new JMenuItem("Guardar como fichero Microsoft Word");
+        JMenuItem itemGuardarComo = new JMenuItem("Guardar como...");
+        JMenuItem itemEliminarTodos = new JMenuItem("Cerrar todos los documentos");
+        JMenuItem itemSalir = new JMenuItem("Salir");
         
         menuArchivo.add(abrirArchivo);
         menuArchivo.add(nuevoArchivo);
-        menuArchivo.add(guardarArchivo);
-        menuArchivo.add(guardarPDF);
+        menuGuardar.add(itemGuardarTXT);
+        menuGuardar.add(itemGuardarRTF);
+        menuGuardar.add(itemGuardarPDF);
+        menuGuardar.add(itemGuardarDOC);
+        menuArchivo.add(menuGuardar);
+        menuArchivo.add(itemGuardarComo);
+        menuArchivo.add(new JSeparator(JSeparator.HORIZONTAL));
+        menuArchivo.add(itemEliminarTodos);
+        menuArchivo.add(itemSalir);
         
         //JMenuItem -> JMenu Edición:
-        JMenuItem buscar = new JMenuItem("Buscar...");
+        //JMenuItem buscar = new JMenuItem("Buscar...");
         JMenuItem itemDeshacer = new JMenuItem("Deshacer");
         JMenuItem itemRehacer = new JMenuItem("Rehacer");
-        JMenuItem cortar = new JMenuItem("Cortar");
-        JMenuItem copiar = new JMenuItem("Copiar");
-        JMenuItem pegar = new JMenuItem("Pegar");
-        JMenuItem seleccionarTodo = new JMenuItem("Seleccionar todo");
+        JMenuItem itemCortar = new JMenuItem("Cortar");
+        JMenuItem itemCopiar = new JMenuItem("Copiar");
+        JMenuItem itemPegar = new JMenuItem("Pegar");
+        JMenuItem itemSeleccionTodo = new JMenuItem("Seleccionar todo");
         
-        menuEdicion.add(buscar);
+        //menuEdicion.add(buscar);
         menuEdicion.add(itemDeshacer);
         menuEdicion.add(itemRehacer);
-        menuEdicion.add(cortar);
-        menuEdicion.add(copiar);
-        menuEdicion.add(pegar);
-        menuEdicion.add(seleccionarTodo);
+        menuEdicion.add(new JSeparator(JSeparator.HORIZONTAL));
+        menuEdicion.add(itemCortar);
+        menuEdicion.add(itemCopiar);
+        menuEdicion.add(itemPegar);
+        menuEdicion.add(itemSeleccionTodo);
         
         //Les damos atajos de teclado (CTRL + tecla):
         nuevoArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         abrirArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
-        guardarArchivo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        itemGuardarTXT.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         
-        buscar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
+        //buscar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
         itemDeshacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
         itemRehacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
-        cortar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK));
-        copiar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
-        pegar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
-        seleccionarTodo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
+        itemCortar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK));
+        itemCopiar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+        itemPegar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
+        itemSeleccionTodo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
         
         //Instanciamos los eventos de click a los JMenuItems:
         nuevoArchivo.addActionListener((ActionEvent e) -> {
@@ -125,8 +139,33 @@ public class PanelEditor extends JPanel
             this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setComponentPopupMenu(this.menuContextual);
         });
         
-        guardarArchivo.addActionListener((ActionEvent e) -> {
-            this.handler.guardarDocumento(this.panelPestanas);
+        itemGuardarTXT.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.TXT);
+        });
+        
+        itemGuardarRTF.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.RTF);
+        });
+        
+        itemGuardarPDF.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.PDF);
+        });
+        
+        itemGuardarDOC.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.DOCX);
+        });
+        
+        itemGuardarComo.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, null);
+        });
+        
+        itemEliminarTodos.addActionListener((ActionEvent e) -> {
+            this.panelPestanas.removeAll();
+            this.handler.cerrarTodosDocumentos();
+        });
+        
+        itemSalir.addActionListener((ActionEvent e) -> {
+            System.exit(0);
         });
         
         itemDeshacer.addActionListener((ActionEvent e) -> {
@@ -136,6 +175,14 @@ public class PanelEditor extends JPanel
         itemRehacer.addActionListener((ActionEvent e) -> {
             this.handler.rehacerCambios(this.panelPestanas.getSelectedIndex());
         });
+        
+        itemSeleccionTodo.addActionListener((ActionEvent e) -> {
+            this.handler.seleccionarTexto(this.panelPestanas.getSelectedIndex());
+        });
+        
+        itemCortar.addActionListener(new StyledEditorKit.CutAction());
+        itemCopiar.addActionListener(new StyledEditorKit.CopyAction());
+        itemPegar.addActionListener(new StyledEditorKit.PasteAction());
     }
         
     private void inicializarMenuHerramientas()
@@ -170,8 +217,10 @@ public class PanelEditor extends JPanel
         
         JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
         this.selectorFuente = new JComboBox(TIPOS_FUENTE);
-        this.selectorTamano = new JSpinner(new SpinnerListModel(TAMANOS_FUENTE));
-        selectorTamano.setPreferredSize(new Dimension(46, 64));
+        SpinnerListModel model = new SpinnerListModel(TAMANOS_FUENTE);
+        model.setValue(14);
+        this.selectorTamano = new JSpinner(model);
+        this.selectorTamano.setPreferredSize(new Dimension(46, 64));
         
         //Pegamos estos nuevos componentes en el menú:       
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
@@ -331,8 +380,8 @@ public class PanelEditor extends JPanel
         //Inicializamos el componente JPopupMenu:
         this.menuContextual = new JPopupMenu();
         
-        //Instanciamos los JMenuItem que estarán dentro del JPopupMenu:
-        //JMenuItem 'Tipo de letra':
+        //Instanciamos los JMenu que estarán dentro del JPopupMenu:
+        //JMenuItem - > JMenu 'Tipo de letra':
         JMenu menuTipoLetra = new JMenu("Tipo de fuente...");        
         for (String s : TIPOS_FUENTE)
         {
@@ -343,7 +392,7 @@ public class PanelEditor extends JPanel
             menuTipoLetra.add(itemFuente);
         }
         
-        //JMenuItem 'Tamaño de fuente':
+        //JMenuItem -> JMenu 'Tamaño de fuente':
         JMenu menuTamano = new JMenu("Tamaño de fuente...");
         for (Integer i : TAMANOS_FUENTE)
         {
@@ -354,7 +403,7 @@ public class PanelEditor extends JPanel
             menuTamano.add(itemTamano);
         }
         
-        //JMenuItem 'Estilos':
+        //JMenuItem -> JMenu 'Estilos':
         JMenu menuEstilo = new JMenu("Estilo...");
         JMenuItem itemNegrita = new JMenuItem("Negrita");
         JMenuItem itemCursiva = new JMenuItem("Cursiva");
@@ -381,7 +430,7 @@ public class PanelEditor extends JPanel
         menuEstilo.add(itemSubindice);
         menuEstilo.add(itemSuperindice);
         
-        //JMenuItem 'Alineación':
+        //JMenuItem -> JMenu 'Alineación':
         JMenu menuAlineacion = new JMenu("Alineación...");
         JMenuItem itemIzqda = new JMenuItem("Izquierda");
         JMenuItem itemDcha = new JMenuItem("Derecha");

@@ -584,4 +584,12 @@ public class GestorEventosEditor
             this.listaDocumentos.get(indice).requestFocusInWindow();
         }
     }
+    
+    public void cerrarTodosDocumentos()
+    {
+        this.listaDocumentos.clear();
+        this.listaArchivosAbiertos.clear();
+        this.listaManager.clear();
+        this.contador = 1;
+    }
 }
