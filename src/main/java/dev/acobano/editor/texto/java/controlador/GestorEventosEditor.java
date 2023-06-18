@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -30,6 +32,7 @@ import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.StyledEditorKit;
 import javax.swing.text.rtf.RTFEditorKit;
 import javax.swing.undo.UndoManager;
 
@@ -547,6 +550,56 @@ public class GestorEventosEditor
             //Ponemos el foco en el documento para mejor UX:
             this.listaDocumentos.get(indice).requestFocusInWindow();
         }
+    }
+    
+    public Action cortarTexto()
+    {
+        return new StyledEditorKit.CutAction();
+    }
+    
+    public Action copiarTexto()
+    {
+        return new StyledEditorKit.CopyAction();
+    }
+    
+    public Action pegarTexto()
+    {
+        return new StyledEditorKit.PasteAction();
+    }
+    
+    public Action alinearTextoIzquierda()
+    {
+        return new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT);
+    }
+    
+    public Action alinearTextoDerecha()
+    {
+        return new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT);
+    }
+    
+    public Action centrarTexto()
+    {
+        return new StyledEditorKit.AlignmentAction("Centro", StyleConstants.ALIGN_CENTER);
+    }
+    
+    public Action justificarTexto()
+    {
+        return new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED);
+    }
+    
+    public Action escribirNegrita()
+    {
+        return new StyledEditorKit.BoldAction();
+    }
+    
+    public Action escribirCursiva()
+    {
+        return new StyledEditorKit.ItalicAction();
+    }
+    
+    public Action escribirSubrayado()
+    {
+        return new StyledEditorKit.UnderlineAction();
     }
     
     public void escribirSuperindice(int indice)
