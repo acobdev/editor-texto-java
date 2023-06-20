@@ -1,6 +1,8 @@
 package dev.acobano.editor.texto.java.vista;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.text.Document;
@@ -21,7 +23,7 @@ public class PanelDocumento extends JPanel
     private TextLineNumber tln;
     
     //CONSTRUCTOR:
-    public PanelDocumento(JTextPane doc, UndoManager manager, JLabel etqCursor, JLabel etqDoc)
+    public PanelDocumento(JTextPane doc, UndoManager manager, JLabel etqCursor, JLabel etqDoc, JPopupMenu menuContextual)
     {
         //Setteamos el layout del panel:
         this.setLayout(new BorderLayout());
@@ -33,7 +35,7 @@ public class PanelDocumento extends JPanel
         this.documento.getDocument().addUndoableEditListener(manager);
     
         //Ponemos el foco en el documento para mejor UX:
-        this.documento.requestFocusInWindow();
+        this.documento.requestFocus();
         
         //Inicializamos el componente Scroll de este panel:
         this.barraDeslizable = new JScrollPane(documento, 
@@ -71,6 +73,15 @@ public class PanelDocumento extends JPanel
                            contadorCaracteres + " caracteres  -  " +
                            contadorPalabras + " palabras   ");
         });
+        
+        //Agregamos un MouseListener para que aparezca el JPopupMenu al hacer click derecho:
+        this.documento.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent me) {
+            if (SwingUtilities.isRightMouseButton(me))
+                if (me.getClickCount() == 1)
+                    menuContextual.show(documento, me.getX(), me.getY());
+        }});
         
         //Pegamos los componentes en el panel:
         this.add(this.barraDeslizable);
