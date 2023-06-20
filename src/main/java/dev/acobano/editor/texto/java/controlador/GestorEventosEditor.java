@@ -6,33 +6,22 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode;
 import org.apache.poi.xwpf.usermodel.*;
 
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JColorChooser;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextPane;
+import java.awt.*;
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import javax.swing.text.rtf.RTFEditorKit;
 import javax.swing.undo.UndoManager;
 
@@ -78,11 +67,12 @@ public class GestorEventosEditor
     public void crearNuevoDocumento(PanelConPestanasCerrable panelPestanas, 
                                     JPanel piePagina, 
                                     JLabel etqCursor, 
-                                    JLabel etqDoc)
+                                    JLabel etqDoc,
+                                    JPopupMenu menuContextual)
     {
         JTextPane panelTexto = new JTextPane();
         UndoManager manager = new UndoManager();
-        PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc);
+        PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc, menuContextual);
         
         if (this.listaDocumentos.isEmpty())
             this.contador = 1;
@@ -95,7 +85,11 @@ public class GestorEventosEditor
         this.contador++;
     }
     
-    public void abrirDocumento(PanelConPestanasCerrable panelPestanas, JPanel piePagina, JLabel etqCursor, JLabel etqDoc)
+    public void abrirDocumento(PanelConPestanasCerrable panelPestanas, 
+                               JPanel piePagina, 
+                               JLabel etqCursor, 
+                               JLabel etqDoc,
+                               JPopupMenu menuContextual)
     {
         JFileChooser selectorArchivo = new JFileChooser();
         selectorArchivo.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -120,7 +114,7 @@ public class GestorEventosEditor
                     this.listaArchivosAbiertos.add(f);
                     JTextPane panelTexto = new JTextPane();
                     UndoManager manager = new UndoManager();
-                    PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc);
+                    PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc, menuContextual);
                     
                     //Empleamos un Input Stream para traer la información del archivo:
                     BufferedReader flujoEntrada = new BufferedReader(new FileReader(f.getPath()));
@@ -198,7 +192,8 @@ public class GestorEventosEditor
                     this.listaArchivosAbiertos.add(archivo);
                     this.escribirArchivo(panelPestanas.getSelectedIndex(), archivo);                 
                 }
-            //En caso de que ya se encuentre abierto, lo que haremos será sobreescribirlo:
+            //En caso de que ya se encuentre abierto, lo que haremos será 
+            //sobreescribirlo con el flujo de salida de datos por defecto:
             } else {
                 this.escribirArchivo(panelPestanas.getSelectedIndex(), guardado);
             }
@@ -299,9 +294,19 @@ public class GestorEventosEditor
                         this.guardarComoDOCX(panelPestanas.getSelectedIndex(), ficheroAGuardar);
                         break;
                     }
-                    //Caso por defecto, se llama al flujo de salida por defecto de Java:
+                    //Caso por defecto, se llama al flujo de salida básico de Java:
                     default:
                         this.escribirArchivo(this.listaArchivosAbiertos.size(), ficheroAGuardar);
+                   
+                    //Introducimos el fichero en nuestro ArrayList:
+                    this.listaArchivosAbiertos.add(ficheroAGuardar);
+
+                    //Avisamos al usuario que el procedimiento de guardado ha sido exitoso:
+                    JOptionPane.showMessageDialog(null, 
+                                                  "El documento " + ficheroAGuardar.getName() +
+                                                  " ha sido guardado exitosamente en la ruta: " + ficheroAGuardar.getAbsolutePath(), 
+                                                  "ARCHIVO GUARDADO", 
+                                                  JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         }
@@ -330,16 +335,6 @@ public class GestorEventosEditor
             //Cerramos los streams:
             buferMemoria.close();
             flujoSalida.close();
-                        
-            //Introducimos el fichero en nuestro ArrayList:
-            this.listaArchivosAbiertos.add(ficheroAGuardar);
-            
-            //Avisamos al usuario que el procedimiento de guardado ha sido exitoso:
-            JOptionPane.showMessageDialog(null, 
-                                          "El documento " + ficheroAGuardar.getName() +
-                                          " ha sido guardado exitosamente en la ruta: " + ficheroAGuardar.getAbsolutePath(), 
-                                          "ARCHIVO GUARDADO", 
-                                          JOptionPane.INFORMATION_MESSAGE);
         }
         catch(IOException ioe)
         {
@@ -362,16 +357,6 @@ public class GestorEventosEditor
             FileOutputStream fos = new FileOutputStream(ficheroAGuardar);
             editorKit.write(fos, doc, 0, doc.getLength());
             fos.close();
-                        
-            //Introducimos el fichero en nuestro ArrayList:
-            this.listaArchivosAbiertos.add(ficheroAGuardar);
-            
-            //Avisamos al usuario que el procedimiento de guardado ha sido exitoso:
-            JOptionPane.showMessageDialog(null, 
-                                          "El documento " + ficheroAGuardar.getName() +
-                                          " ha sido guardado exitosamente en la ruta: " + ficheroAGuardar.getAbsolutePath(), 
-                                          "ARCHIVO GUARDADO", 
-                                          JOptionPane.INFORMATION_MESSAGE);
         }
         catch (IOException | BadLocationException ex)
         {
@@ -404,9 +389,6 @@ public class GestorEventosEditor
             //Guardamos el documento como archivo PDF:
             doc.save(ficheroAGuardar);
             doc.close();
-            
-            //Introducimos el fichero en nuestro ArrayList:
-            this.listaArchivosAbiertos.add(ficheroAGuardar);
         }
         catch (IOException ioe)
         {
@@ -431,9 +413,6 @@ public class GestorEventosEditor
             run.setText(this.listaDocumentos.get(indice).getText());
             documento.write(fos);
             fos.close();
-            
-            //Introducimos el fichero en nuestro ArrayList:
-            this.listaArchivosAbiertos.add(ficheroAGuardar);
         }
         catch (IOException ioe)
         {
@@ -480,7 +459,7 @@ public class GestorEventosEditor
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocusInWindow();
+            this.listaDocumentos.get(indice).requestFocus();
         }
         else
             JOptionPane.showMessageDialog(null,
@@ -508,7 +487,7 @@ public class GestorEventosEditor
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocusInWindow();
+            this.listaDocumentos.get(indice).requestFocus();
         }else
             JOptionPane.showMessageDialog(null,
                                           "No ha seleccionado ningún color de la paleta para cambiar el color del resaltado.",
@@ -530,7 +509,7 @@ public class GestorEventosEditor
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocusInWindow();
+            this.listaDocumentos.get(indice).requestFocus();
         }        
     }
     
@@ -548,7 +527,94 @@ public class GestorEventosEditor
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocusInWindow();
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+    }
+    
+    public void insertarImagen(int indice)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Instanciamos un JFileChooser para que el usuario eliga la imagen que desee del sistema:
+            JFileChooser selectorImagen = new JFileChooser();
+            selectorImagen.setDialogTitle("Seleccionar imagen");
+            selectorImagen.setFileFilter(new FileNameExtensionFilter("Imágenes del sistema",
+                                                                     "jpg", "jpeg", "svg", "png", "gif"));
+            int opcion = selectorImagen.showOpenDialog(null);
+
+            //En caso de aceptar, accedemos al archivo de imagen y lo ponemos en el JTextPane seleccionado:
+            if (opcion == JFileChooser.APPROVE_OPTION)
+            {
+                File archivo = selectorImagen.getSelectedFile();
+                ImageIcon imagenAInsertar = new ImageIcon(archivo.getAbsolutePath());
+                this.listaDocumentos.get(indice).insertIcon(imagenAInsertar);
+            }
+        }
+    }
+    
+    public void insertarTabla(int indice)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //En primer lugar, creamos un JOptionPane para saber el número de filas y columnas:
+            JPanel panelDatos = new JPanel(new GridLayout(2, 2));
+            JLabel etqFilas = new JLabel("Nº de filas: ");
+            JSpinner selectorFilas = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
+            JLabel etqColumnas = new JLabel("Nº de columnas: ");
+            JSpinner selectorColumnas = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
+
+            panelDatos.add(etqFilas);
+            panelDatos.add(selectorFilas);
+            panelDatos.add(etqColumnas);
+            panelDatos.add(selectorColumnas);
+
+            int opcion = JOptionPane.showConfirmDialog(null, 
+                                                       panelDatos, 
+                                                       "ESPECIFICAR TAMAÑO DE TABLA", 
+                                                       JOptionPane.OK_CANCEL_OPTION, 
+                                                       JOptionPane.PLAIN_MESSAGE);
+
+            if (opcion == JOptionPane.OK_OPTION)
+            {
+                //Obtenemos los valores introducidos por el usuario:
+                int numFilas = (int) selectorFilas.getValue();
+                int numColumnas = (int) selectorColumnas.getValue();
+
+                //Cambiamos el tipo de texto para que acepte lenguaje HTML:
+                this.listaDocumentos.get(indice).setContentType("text/html");            
+                HTMLEditorKit kit = new HTMLEditorKit();
+                this.listaDocumentos.get(indice).setEditorKit(kit);
+                int posicionCursor = this.listaDocumentos.get(indice).getCaretPosition();
+
+                //Creamos el estilo CSS para el JTextPane:
+                String estiloCSS = "table { border-collapse: collapse; }" +
+                                   "td, th { border: 3px solid black; padding: 5px; } ";
+                StyleSheet hojaEstilos = kit.getStyleSheet();
+                hojaEstilos.addRule(estiloCSS);
+
+                //Obtenemos el documento del JTextPane:
+                StyledDocument doc = this.listaDocumentos.get(indice).getStyledDocument();
+
+                //Creamos el contenido HTML de la tabla:
+                String tablaHTML = "<table>";
+
+                for (int i=1; i<=numFilas; i++)
+                {
+                    tablaHTML += "<tr>";
+
+                    for (int j=1; j<=numColumnas; j++)
+                        tablaHTML += "<td>    </td>";
+
+                    tablaHTML += "</tr>";
+                }
+
+                tablaHTML += "</table>";
+
+                //Insertamos la tabla en el JTextPane:
+                try { 
+                    doc.insertString(posicionCursor, tablaHTML, null);
+                } catch (BadLocationException ex) {}
+            }
         }
     }
     
@@ -616,7 +682,7 @@ public class GestorEventosEditor
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocusInWindow();
+            this.listaDocumentos.get(indice).requestFocus();
         }
     }
     
@@ -634,7 +700,7 @@ public class GestorEventosEditor
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocusInWindow();
+            this.listaDocumentos.get(indice).requestFocus();
         }
     }
     

@@ -45,37 +45,37 @@ public class PanelEditor extends JPanel
         //Inicializamos el objeto gestor del controlador:
         this.handler = new GestorEventosEditor();
         
-        //Instanciamos los componentes integrantes del panel:      
+        //Instanciamos los componentes integrantes del panel:
+        this.inicializarMenuContextual();   
         this.inicializarMenuHerramientas();
         this.inicializarBarraNavegacion();       
         this.inicializarPiePagina();
         this.inicializarPanelPestanas();
         this.inicializarLayoutPanel();
         this.inicializarAtajosTeclado();
-        this.inicializarMenuContextual();
     }
     
     
     //MÉTODOS PRIVADOS DE INICIALIZACIÓN:
     private void inicializarBarraNavegacion()
     {
-        //Inicializamos la barra de herramientas:
+        //Inicializamos la barra de menuInsertar:
         this.barraNavegacion = new JMenuBar();
         
         //Se crean los JMenu que estarán dentro del JMenuBar:
         JMenu menuArchivo = new JMenu("Archivo");
         JMenu menuEdicion = new JMenu("Edición");
-        JMenu herramientas = new JMenu ("Herramientas");
+        JMenu menuInsertar = new JMenu ("Insertar");
         
         //Se insertan los JMenu en el JMenuBar:
         this.barraNavegacion.add(menuArchivo);
         this.barraNavegacion.add(menuEdicion);
-        this.barraNavegacion.add(herramientas);
+        this.barraNavegacion.add(menuInsertar);
         
         //Se crean los JMenuItem de cada uno de los JMenu:
         //JMenuItem -> JMenu Archivo:
-        JMenuItem abrirArchivo = new JMenuItem("Abrir documento");
-        JMenuItem nuevoArchivo = new JMenuItem("Nuevo documento");
+        JMenuItem itemAbrir = new JMenuItem("Abrir documento");
+        JMenuItem itemNuevo = new JMenuItem("Nuevo documento");
         JMenu menuGuardar = new JMenu("Guardar...");
         JMenuItem itemGuardarTXT = new JMenuItem("Guardar como fichero TXT");
         JMenuItem itemGuardarRTF = new JMenuItem("Guardar como fichero RTF");
@@ -85,8 +85,8 @@ public class PanelEditor extends JPanel
         JMenuItem itemEliminarTodos = new JMenuItem("Cerrar todos los documentos");
         JMenuItem itemSalir = new JMenuItem("Salir");
         
-        menuArchivo.add(abrirArchivo);
-        menuArchivo.add(nuevoArchivo);
+        menuArchivo.add(itemAbrir);
+        menuArchivo.add(itemNuevo);
         menuGuardar.add(itemGuardarTXT);
         menuGuardar.add(itemGuardarRTF);
         menuGuardar.add(itemGuardarPDF);
@@ -115,16 +115,21 @@ public class PanelEditor extends JPanel
         menuEdicion.add(itemPegar);
         menuEdicion.add(itemSeleccionTodo);
         
+        //JMenuItem - JMenu 'Insertar':
+        JMenuItem itemImagen = new JMenuItem("Insertar imagen");
+        JMenuItem itemTabla = new JMenuItem("Insertar tabla");
+        
+        menuInsertar.add(itemImagen);
+        menuInsertar.add(itemTabla);
+        
         //Instanciamos los eventos de click a los JMenuItems:
-        nuevoArchivo.addActionListener((ActionEvent e) -> {
-            this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
-            this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setComponentPopupMenu(this.menuContextual);
+        itemNuevo.addActionListener((ActionEvent e) -> {
+            this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
             this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setFont(new Font(String.valueOf(this.selectorFuente.getSelectedItem()), Font.PLAIN, (Integer) this.selectorTamano.getValue()));
         });
         
-        abrirArchivo.addActionListener((ActionEvent e) -> {
-            this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
-            this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setComponentPopupMenu(this.menuContextual);
+        itemAbrir.addActionListener((ActionEvent e) -> {
+            this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
         });
         
         itemGuardarTXT.addActionListener((ActionEvent e) -> {
@@ -166,6 +171,14 @@ public class PanelEditor extends JPanel
         
         itemSeleccionTodo.addActionListener((ActionEvent e) -> {
             this.handler.seleccionarTexto(this.panelPestanas.getSelectedIndex());
+        });
+        
+        itemImagen.addActionListener((ActionEvent e) -> {
+            this.handler.insertarImagen(this.panelPestanas.getSelectedIndex());
+        });
+        
+        itemTabla.addActionListener((ActionEvent e) -> {
+            this.handler.insertarTabla(this.panelPestanas.getSelectedIndex());
         });
         
         itemCortar.addActionListener(this.handler.cortarTexto());
@@ -269,11 +282,11 @@ public class PanelEditor extends JPanel
         
         //Creamos los respectios eventos de botón:
         btnNuevo.addActionListener((ActionEvent e) -> {
-            this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
+            this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
         });
         
         btnAbrir.addActionListener((ActionEvent e) -> {
-            this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento);
+            this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
         });
         
         guardar.addActionListener((ActionEvent e) -> {
@@ -332,6 +345,7 @@ public class PanelEditor extends JPanel
         this.etqCursor = new JLabel();
         this.etqDocumento = new JLabel();
         
+        //Pegamos los componentes secundarios en el pie de página:
         this.piePagina.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width, 30));
         this.piePagina.setLayout(new BorderLayout());
         this.piePagina.add(etqCursor, BorderLayout.WEST);
@@ -474,14 +488,14 @@ public class PanelEditor extends JPanel
         Action accionNuevo = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                handler.crearNuevoDocumento(panelPestanas, piePagina, etqCursor, etqDocumento);
+                handler.crearNuevoDocumento(panelPestanas, piePagina, etqCursor, etqDocumento, menuContextual);
             }
         };
         
         Action accionAbrir = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                handler.abrirDocumento(panelPestanas, piePagina, etqCursor, etqDocumento);
+                handler.abrirDocumento(panelPestanas, piePagina, etqCursor, etqDocumento, menuContextual);
             }
         };
         
@@ -576,5 +590,10 @@ public class PanelEditor extends JPanel
     public PanelConPestanasCerrable getPanelPestanas()
     {
         return this.panelPestanas;
+    }
+    
+    public JPopupMenu getMenuContextual()
+    {
+        return this.menuContextual;
     }
 }
