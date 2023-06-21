@@ -12,16 +12,14 @@ import java.util.*;
 import java.util.logging.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
 import javax.swing.text.rtf.RTFEditorKit;
 import javax.swing.undo.UndoManager;
 
@@ -429,17 +427,37 @@ public class GestorEventosEditor
     {
         if (this.listaManager.get(indice).canUndo())
             this.listaManager.get(indice).undo();
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void rehacerCambios(int indice)
     {
         if (this.listaManager.get(indice).canRedo())
             this.listaManager.get(indice).redo();
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void seleccionarTexto(int indice)
     {
-        this.listaDocumentos.get(indice).selectAll();
+        if (!this.listaManager.isEmpty())
+            this.listaDocumentos.get(indice).selectAll();
+        else
+            
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void cambiarColorTexto(int indice)
@@ -510,7 +528,13 @@ public class GestorEventosEditor
             
             //Ponemos el foco en el documento para mejor UX:
             this.listaDocumentos.get(indice).requestFocus();
-        }        
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void cambiarTamanoFuente(int indice, Object valorSeleccionado)
@@ -529,6 +553,12 @@ public class GestorEventosEditor
             //Ponemos el foco en el documento para mejor UX:
             this.listaDocumentos.get(indice).requestFocus();
         }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void insertarImagen(int indice)
@@ -539,7 +569,7 @@ public class GestorEventosEditor
             JFileChooser selectorImagen = new JFileChooser();
             selectorImagen.setDialogTitle("Seleccionar imagen");
             selectorImagen.setFileFilter(new FileNameExtensionFilter("Imágenes del sistema",
-                                                                     "jpg", "jpeg", "svg", "png", "gif"));
+                                                                     "jpg", "jpeg", "svg", "png", "tiff", "gif"));
             int opcion = selectorImagen.showOpenDialog(null);
 
             //En caso de aceptar, accedemos al archivo de imagen y lo ponemos en el JTextPane seleccionado:
@@ -549,10 +579,21 @@ public class GestorEventosEditor
                 ImageIcon imagenAInsertar = new ImageIcon(archivo.getAbsolutePath());
                 this.listaDocumentos.get(indice).insertIcon(imagenAInsertar);
             }
+            else
+            JOptionPane.showMessageDialog(null, 
+                                          "No ha seleccionado ninguna imagen para su inserción en el documento.",
+                                          "AVISO",
+                                          JOptionPane.INFORMATION_MESSAGE);
         }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public void insertarTabla(int indice)
+    public void insertarTabla(int indice, Object fuente, Object tamano)
     {
         if (!this.listaDocumentos.isEmpty())
         {
@@ -570,7 +611,7 @@ public class GestorEventosEditor
 
             int opcion = JOptionPane.showConfirmDialog(null, 
                                                        panelDatos, 
-                                                       "ESPECIFICAR TAMAÑO DE TABLA", 
+                                                       "Especificar tamaño de tabla", 
                                                        JOptionPane.OK_CANCEL_OPTION, 
                                                        JOptionPane.PLAIN_MESSAGE);
 
@@ -579,43 +620,36 @@ public class GestorEventosEditor
                 //Obtenemos los valores introducidos por el usuario:
                 int numFilas = (int) selectorFilas.getValue();
                 int numColumnas = (int) selectorColumnas.getValue();
+                
+                //Creamos una JTable con las filas y columnas pedidas por el usuario:
+                TableModel modelo = new AbstractTableModel() {
+                    @Override
+                    public int getRowCount() { return numFilas; }
 
-                //Cambiamos el tipo de texto para que acepte lenguaje HTML:
-                this.listaDocumentos.get(indice).setContentType("text/html");            
-                HTMLEditorKit kit = new HTMLEditorKit();
-                this.listaDocumentos.get(indice).setEditorKit(kit);
-                int posicionCursor = this.listaDocumentos.get(indice).getCaretPosition();
+                    @Override
+                    public int getColumnCount() { return numColumnas; }
 
-                //Creamos el estilo CSS para el JTextPane:
-                String estiloCSS = "table { border-collapse: collapse; }" +
-                                   "td, th { border: 3px solid black; padding: 5px; } ";
-                StyleSheet hojaEstilos = kit.getStyleSheet();
-                hojaEstilos.addRule(estiloCSS);
-
-                //Obtenemos el documento del JTextPane:
-                StyledDocument doc = this.listaDocumentos.get(indice).getStyledDocument();
-
-                //Creamos el contenido HTML de la tabla:
-                String tablaHTML = "<table>";
-
-                for (int i=1; i<=numFilas; i++)
-                {
-                    tablaHTML += "<tr>";
-
-                    for (int j=1; j<=numColumnas; j++)
-                        tablaHTML += "<td>    </td>";
-
-                    tablaHTML += "</tr>";
-                }
-
-                tablaHTML += "</table>";
-
-                //Insertamos la tabla en el JTextPane:
-                try { 
-                    doc.insertString(posicionCursor, tablaHTML, null);
-                } catch (BadLocationException ex) {}
+                    @Override
+                    public Object getValueAt(int row, int col) { return numFilas * numColumnas; }
+                    
+                };
+                JTable tabla = new JTable(modelo);
+                
+                //Insertamos el JTable en su respectivo panel:
+                this.listaDocumentos.get(indice).add(new JScrollPane(tabla), BorderLayout.CENTER);
             }
+            else
+                JOptionPane.showMessageDialog(null, 
+                                              "No ha insertado ningún dato con el que insertar la tabla en el documento.",
+                                              "AVISO",
+                                              JOptionPane.INFORMATION_MESSAGE);
         }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public Action cortarTexto()
