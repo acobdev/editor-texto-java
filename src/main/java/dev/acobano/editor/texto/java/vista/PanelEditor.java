@@ -162,23 +162,25 @@ public class PanelEditor extends JPanel
         });
         
         itemDeshacer.addActionListener((ActionEvent e) -> {
-            this.handler.deshacerCambios(this.panelPestanas.getSelectedIndex());
+            this.handler.deshacerCambios(this.getIndicePestana());
         });
         
         itemRehacer.addActionListener((ActionEvent e) -> {
-            this.handler.rehacerCambios(this.panelPestanas.getSelectedIndex());
+            this.handler.rehacerCambios(this.getIndicePestana());
         });
         
         itemSeleccionTodo.addActionListener((ActionEvent e) -> {
-            this.handler.seleccionarTexto(this.panelPestanas.getSelectedIndex());
+            this.handler.seleccionarTexto(this.getIndicePestana());
         });
         
         itemImagen.addActionListener((ActionEvent e) -> {
-            this.handler.insertarImagen(this.panelPestanas.getSelectedIndex());
+            this.handler.insertarImagen(this.getIndicePestana());
         });
         
         itemTabla.addActionListener((ActionEvent e) -> {
-            this.handler.insertarTabla(this.panelPestanas.getSelectedIndex());
+            this.handler.insertarTabla(this.getIndicePestana(), 
+                                       this.selectorFuente.getSelectedItem(), 
+                                       this.selectorTamano.getValue());
         });
         
         itemCortar.addActionListener(this.handler.cortarTexto());
@@ -195,15 +197,13 @@ public class PanelEditor extends JPanel
         //Instanciamos los botones del menú:
         JButton btnNuevo = new JButton(new ImageIcon("src/main/resources/icons/text.png"));
         JButton btnAbrir = new JButton(new ImageIcon("src/main/resources/icons/file.png"));
-        JButton guardar = new JButton(new ImageIcon("src/main/resources/icons/save.png"));
-        //JButton guardarPDF = new JButton(new ImageIcon("src/main/resources/icons/pdf.png"));
-        
+        JButton btnGuardar = new JButton(new ImageIcon("src/main/resources/icons/save.png"));
+        JButton btnGuardarComo = new JButton(new ImageIcon("src/main/resources/icons/saveas.png"));     
         JButton btnDeshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
         JButton btnRehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
         JButton btnCortar = new JButton(new ImageIcon("src/main/resources/icons/cut.png"));
         JButton btnCopiar = new JButton(new ImageIcon("src/main/resources/icons/copy.png"));
-        JButton btnPegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));
-        
+        JButton btnPegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));        
         JButton btnNegrita = new JButton(new ImageIcon("src/main/resources/icons/bold.png"));
         JButton btnCursiva = new JButton(new ImageIcon("src/main/resources/icons/italics.png"));
         JButton btnSubrayado = new JButton(new ImageIcon("src/main/resources/icons/underlined.png"));
@@ -214,13 +214,11 @@ public class PanelEditor extends JPanel
         JButton btnJustificado = new JButton(new ImageIcon("src/main/resources/icons/alignjustify.png"));
         JButton btnSubindice = new JButton(new ImageIcon("src/main/resources/icons/subscript.png"));
         JButton btnSuperindice = new JButton(new ImageIcon("src/main/resources/icons/superscript.png"));
-        //JButton insertarImagen = new JButton(new ImageIcon("src/main/resources/icons/addimage.png"));
-        
         JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
         this.selectorFuente = new JComboBox(TIPOS_FUENTE);
-        SpinnerListModel model = new SpinnerListModel(TAMANOS_FUENTE);
-        model.setValue(14);
-        this.selectorTamano = new JSpinner(model);
+        SpinnerListModel modelo = new SpinnerListModel(TAMANOS_FUENTE);
+        modelo.setValue(14);
+        this.selectorTamano = new JSpinner(modelo);
         this.selectorTamano.setPreferredSize(new Dimension(46, 64));
         
         //Pegamos estos nuevos componentes en el menú:       
@@ -231,8 +229,8 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnNuevo);
         this.menuHerramientas.add(btnAbrir);
-        this.menuHerramientas.add(guardar);
-        //this.menuHerramientas.add(guardarPDF);
+        this.menuHerramientas.add(btnGuardar);
+        this.menuHerramientas.add(btnGuardarComo);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnDeshacer);
         this.menuHerramientas.add(btnRehacer);
@@ -252,14 +250,13 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(btnDerecha);
         this.menuHerramientas.add(btnJustificado);       
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        //this.menuHerramientas.add(insertarImagen);
         
         
         //Agregamos tooltips para cuando el usuario haga hover sobre los botones:
         btnNuevo.setToolTipText("Nuevo documento (CTRL + N)");
         btnAbrir.setToolTipText("Abrir documento (CTRL + O)");
-        guardar.setToolTipText("Guardar documento (CTRL + S)");
-        //guardarPDF.setToolTipText("Guardar como archivo PDF");        
+        btnGuardar.setToolTipText("Guardar documento (CTRL + S)");
+        btnGuardarComo.setToolTipText("Guardar como...");        
         btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
         btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
         btnCortar.setToolTipText("Cortar (CTRL + X)");
@@ -275,7 +272,6 @@ public class PanelEditor extends JPanel
         btnCentro.setToolTipText("Centrar (CTRL + T)");
         btnDerecha.setToolTipText("Alinear a la derecha (CTRL + D)");
         btnJustificado.setToolTipText("Justificar (CTRL + J)");
-        //insertarImagen.setToolTipText("Insertar nueva imagen");
         btnSelectorColor.setToolTipText("Color de fuente");
         selectorTamano.setToolTipText("Tamaño de fuente");
         selectorFuente.setToolTipText("Tipo de fuente");
@@ -289,32 +285,36 @@ public class PanelEditor extends JPanel
             this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
         });
         
-        guardar.addActionListener((ActionEvent e) -> {
+        btnGuardar.addActionListener((ActionEvent e) -> {
             this.handler.guardarDocumento(this.panelPestanas);
         });
         
+        btnGuardarComo.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, null);
+        });
+        
         btnDeshacer.addActionListener((ActionEvent e) -> {
-            this.handler.deshacerCambios(this.panelPestanas.getSelectedIndex());
+            this.handler.deshacerCambios(this.getIndicePestana());
         });
         
         btnRehacer.addActionListener((ActionEvent e) -> {
-            this.handler.rehacerCambios(this.panelPestanas.getSelectedIndex());
+            this.handler.rehacerCambios(this.getIndicePestana());
         });
         
         btnSubindice.addActionListener((ActionEvent e) -> {
-            this.handler.escribirSubindice(this.panelPestanas.getSelectedIndex());
+            this.handler.escribirSubindice(this.getIndicePestana());
         });
         
         btnSuperindice.addActionListener((ActionEvent e) -> {
-            this.handler.escribirSuperindice(this.panelPestanas.getSelectedIndex());
+            this.handler.escribirSuperindice(this.getIndicePestana());
         });
         
         btnSelectorColor.addActionListener((ActionEvent e) -> {
-            this.handler.cambiarColorTexto(this.panelPestanas.getSelectedIndex());
+            this.handler.cambiarColorTexto(this.getIndicePestana());
         });
         
         btnResaltado.addActionListener((ActionEvent e) -> {
-            this.handler.cambiarColorResaltado(this.panelPestanas.getSelectedIndex());
+            this.handler.cambiarColorResaltado(this.getIndicePestana());
         });
         
         btnCortar.addActionListener(this.handler.cortarTexto());
@@ -329,11 +329,11 @@ public class PanelEditor extends JPanel
         btnJustificado.addActionListener(this.handler.justificarTexto());
         
         selectorFuente.addItemListener((ItemEvent ie) -> {
-            this.handler.cambiarFuente(this.panelPestanas.getSelectedIndex(), selectorFuente.getSelectedItem());
+            this.handler.cambiarFuente(this.getIndicePestana(), selectorFuente.getSelectedItem());
         });
         
         selectorTamano.addChangeListener((ChangeEvent ce) -> {
-            this.handler.cambiarTamanoFuente(this.panelPestanas.getSelectedIndex(), selectorTamano.getValue());
+            this.handler.cambiarTamanoFuente(this.getIndicePestana(), selectorTamano.getValue());
         });
     }
     
@@ -388,7 +388,7 @@ public class PanelEditor extends JPanel
         {
             JMenuItem itemFuente = new JMenuItem(fuente);
             itemFuente.addActionListener((ActionEvent e) -> {
-                this.handler.cambiarFuente(this.panelPestanas.getSelectedIndex(), fuente);
+                this.handler.cambiarFuente(this.getIndicePestana(), fuente);
             });
             menuTipoLetra.add(itemFuente);
         }
@@ -399,7 +399,7 @@ public class PanelEditor extends JPanel
         {
             JMenuItem itemTamano = new JMenuItem(String.valueOf(tamano));
             itemTamano.addActionListener((ActionEvent e) -> {
-                this.handler.cambiarTamanoFuente(this.panelPestanas.getSelectedIndex(), tamano);
+                this.handler.cambiarTamanoFuente(this.getIndicePestana(), tamano);
             });
             menuTamano.add(itemTamano);
         }
@@ -409,6 +409,7 @@ public class PanelEditor extends JPanel
         JMenuItem itemNegrita = new JMenuItem("Negrita");
         JMenuItem itemCursiva = new JMenuItem("Cursiva");
         JMenuItem itemSubrayado = new JMenuItem("Subrayado");
+        JMenuItem itemTachado = new JMenuItem("Tachado");
         JMenuItem itemSubindice = new JMenuItem("Subíndice");
         JMenuItem itemSuperindice = new JMenuItem("Superíndice");
         
@@ -416,17 +417,22 @@ public class PanelEditor extends JPanel
         itemCursiva.addActionListener(this.handler.escribirCursiva());
         itemSubrayado.addActionListener(this.handler.escribirSubrayado());
         
+        itemTachado.addActionListener((ActionEvent e) -> {
+                this.handler.tacharTexto(this.getIndicePestana());
+            });
+        
         itemSubindice.addActionListener((ActionEvent e) -> {
-                this.handler.escribirSubindice(this.panelPestanas.getSelectedIndex());
+                this.handler.escribirSubindice(this.getIndicePestana());
             });
         
         itemSuperindice.addActionListener((ActionEvent e) -> {
-                this.handler.escribirSuperindice(this.panelPestanas.getSelectedIndex());
+                this.handler.escribirSuperindice(this.getIndicePestana());
             });
         
         menuEstilo.add(itemNegrita);
         menuEstilo.add(itemCursiva);
         menuEstilo.add(itemSubrayado);
+        menuEstilo.add(itemTachado);
         menuEstilo.add(new JSeparator(JSeparator.HORIZONTAL));
         menuEstilo.add(itemSubindice);
         menuEstilo.add(itemSuperindice);
@@ -461,7 +467,9 @@ public class PanelEditor extends JPanel
         KeyStroke atajoSeleccionTodo = KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoNegrita = KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoCopiar = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
-        KeyStroke atajoAlinearDcha = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoAlinearDcha = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK);        
+        KeyStroke atajoResaltado = KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoTachado = KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoCursiva = KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoJustificar = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoNuevo = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK);
@@ -481,7 +489,7 @@ public class PanelEditor extends JPanel
         Action accionSeleccionTodo = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                handler.seleccionarTexto(panelPestanas.getSelectedIndex());
+                handler.seleccionarTexto(getIndicePestana());
             }
         };
         
@@ -506,31 +514,46 @@ public class PanelEditor extends JPanel
             }
         };
         
+        Action accionTachar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.tacharTexto(getIndicePestana());
+            }
+            
+        };
+        
+        Action accionResaltar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.cambiarColorTexto(getIndicePestana());
+            }
+        };
+        
         Action accionDeshacer = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                handler.deshacerCambios(panelPestanas.getSelectedIndex());
+                handler.deshacerCambios(getIndicePestana());
             }
         };
         
         Action accionRehacer = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                handler.rehacerCambios(panelPestanas.getSelectedIndex());
+                handler.rehacerCambios(getIndicePestana());
             }
         };
         
         Action accionSubindice = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                handler.escribirSubindice(panelPestanas.getSelectedIndex());
+                handler.escribirSubindice(getIndicePestana());
             }
         };
         
         Action accionSuperindice = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                handler.escribirSuperindice(panelPestanas.getSelectedIndex());
+                handler.escribirSuperindice(getIndicePestana());
             }
         };
         
@@ -545,7 +568,8 @@ public class PanelEditor extends JPanel
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoSuperindice, "superindice");        
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoNegrita, "negrita");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoCursiva, "cursiva");
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoSubrayado, "subrayado");
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoSubrayado, "subrayado");        
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoTachado, "tachado");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoCortar, "cortar");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoCopiar, "copiar");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoPegar, "pegar");
@@ -566,6 +590,7 @@ public class PanelEditor extends JPanel
         this.getActionMap().put("negrita", this.handler.escribirNegrita());
         this.getActionMap().put("cursiva", this.handler.escribirCursiva());
         this.getActionMap().put("subrayado", this.handler.escribirSubrayado());
+        this.getActionMap().put("tachado", accionTachar);
         this.getActionMap().put("cortar", this.handler.cortarTexto());
         this.getActionMap().put("copiar", this.handler.copiarTexto());
         this.getActionMap().put(("pegar"), this.handler.pegarTexto());
@@ -595,5 +620,10 @@ public class PanelEditor extends JPanel
     public JPopupMenu getMenuContextual()
     {
         return this.menuContextual;
+    }
+    
+    public int getIndicePestana()
+    {
+        return this.panelPestanas.getSelectedIndex();
     }
 }

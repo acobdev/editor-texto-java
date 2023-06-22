@@ -252,9 +252,6 @@ public class GestorEventosEditor
             {
                 File ficheroAGuardar = guardadorArchivo.getSelectedFile();
                 String rutaFichero = ficheroAGuardar.getAbsolutePath();
-                
-                //Cambiamos el título de la pestaña del documento por el nombre del archivo:
-                panelPestanas.getLabelCabecera(panelPestanas.getSelectedIndex()).setText(ficheroAGuardar.getName());
             
                 //Verificamos la extensión del archivo y enviamos a los métodos especializados:
                 switch (formato)
@@ -262,7 +259,7 @@ public class GestorEventosEditor
                     case TXT:
                     {
                         if (!rutaFichero.toLowerCase().endsWith(".txt"))
-                            rutaFichero.concat(".txt");
+                            ficheroAGuardar = new File(rutaFichero + ".txt");
                     
                         this.escribirArchivo(panelPestanas.getSelectedIndex(), ficheroAGuardar);
                         break;
@@ -270,7 +267,7 @@ public class GestorEventosEditor
                     case RTF:
                     {
                         if (!rutaFichero.toLowerCase().endsWith(".rtf"))
-                            rutaFichero.concat(".rtf");
+                            ficheroAGuardar = new File(rutaFichero + ".rtf");
                     
                         this.guardarComoRTF(panelPestanas.getSelectedIndex(), ficheroAGuardar);
                         break;
@@ -278,7 +275,7 @@ public class GestorEventosEditor
                     case PDF:
                     {
                         if (!rutaFichero.toLowerCase().endsWith(".pdf"))
-                            rutaFichero.concat(".pdf");
+                            ficheroAGuardar = new File(rutaFichero + ".pdf");
                     
                         this.guardarComoPDF(panelPestanas.getSelectedIndex(), ficheroAGuardar);
                         break;
@@ -287,7 +284,7 @@ public class GestorEventosEditor
                     {
                         if (!rutaFichero.toLowerCase().endsWith(".doc") &&
                             !rutaFichero.toLowerCase().endsWith(".docx"))
-                                rutaFichero.concat(".docx");
+                                ficheroAGuardar = new File(rutaFichero + ".docx");
                     
                         this.guardarComoDOCX(panelPestanas.getSelectedIndex(), ficheroAGuardar);
                         break;
@@ -295,17 +292,20 @@ public class GestorEventosEditor
                     //Caso por defecto, se llama al flujo de salida básico de Java:
                     default:
                         this.escribirArchivo(this.listaArchivosAbiertos.size(), ficheroAGuardar);
-                   
-                    //Introducimos el fichero en nuestro ArrayList:
-                    this.listaArchivosAbiertos.add(ficheroAGuardar);
-
-                    //Avisamos al usuario que el procedimiento de guardado ha sido exitoso:
-                    JOptionPane.showMessageDialog(null, 
-                                                  "El documento " + ficheroAGuardar.getName() +
-                                                  " ha sido guardado exitosamente en la ruta: " + ficheroAGuardar.getAbsolutePath(), 
-                                                  "ARCHIVO GUARDADO", 
-                                                  JOptionPane.INFORMATION_MESSAGE);
                 }
+                 
+                //Cambiamos el título de la pestaña del documento por el nombre del archivo:
+                panelPestanas.getLabelCabecera(panelPestanas.getSelectedIndex()).setText(ficheroAGuardar.getName());                
+                   
+                //Introducimos el fichero en nuestro ArrayList:
+                this.listaArchivosAbiertos.add(ficheroAGuardar);
+
+                //Avisamos al usuario que el procedimiento de guardado ha sido exitoso:
+                JOptionPane.showMessageDialog(null, 
+                                              "El documento " + ficheroAGuardar.getName() +
+                                              " ha sido guardado exitosamente en la ruta: " + ficheroAGuardar.getAbsolutePath(), 
+                                              "ARCHIVO GUARDADO", 
+                                              JOptionPane.INFORMATION_MESSAGE);
             }
         }
         //En caso de no tener ningún archivo abierto, se avisa al usuario:
@@ -313,7 +313,7 @@ public class GestorEventosEditor
             JOptionPane.showMessageDialog(null, 
                                           "No hay ningún documento abierto actualmente que pueda ser guardado.", 
                                           "ERROR", 
-                                          JOptionPane.ERROR_MESSAGE);
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     private void escribirArchivo(int indice, File ficheroAGuardar)
@@ -425,8 +425,11 @@ public class GestorEventosEditor
     
     public void deshacerCambios(int indice)
     {
-        if (this.listaManager.get(indice).canUndo())
-            this.listaManager.get(indice).undo();
+        if (!this.listaDocumentos.isEmpty())
+        {
+            if (this.listaManager.get(indice).canUndo())
+                this.listaManager.get(indice).undo();
+        }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
@@ -437,8 +440,11 @@ public class GestorEventosEditor
     
     public void rehacerCambios(int indice)
     {
-        if (this.listaManager.get(indice).canRedo())
-            this.listaManager.get(indice).redo();
+        if (!this.listaDocumentos.isEmpty()) 
+        {
+            if (this.listaManager.get(indice).canRedo())
+                this.listaManager.get(indice).redo();
+        }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
@@ -462,55 +468,73 @@ public class GestorEventosEditor
     
     public void cambiarColorTexto(int indice)
     {
-        //Obtenemos los atributos actuales del texto seleccionado:
-        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-        
-        //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
-        Color color = JColorChooser.showDialog(null, "Elija un color para la letra", this.listaDocumentos.get(indice).getSelectedTextColor());
-        
-        if (color != null)
+        if (!this.listaDocumentos.isEmpty())
         {
-            //Cambiamos el color de las letras del texto:
-            StyleConstants.setForeground(atributos, color);
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
 
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
+            //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
+            Color color = JColorChooser.showDialog(null, "Elija un color para la letra", this.listaDocumentos.get(indice).getSelectedTextColor());
+
+            if (color != null)
+            {
+                //Cambiamos el color de las letras del texto:
+                StyleConstants.setForeground(atributos, color);
+
+                //Damos los nuevos atributos al texto:
+                this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+
+                //Ponemos el foco en el documento para mejor UX:
+                this.listaDocumentos.get(indice).requestFocus();
+            }
+            else
+                JOptionPane.showMessageDialog(null,
+                                              "No ha seleccionado ningún color de la paleta para cambiar el color de la letra.",
+                                              "AVISO",
+                                              JOptionPane.INFORMATION_MESSAGE);
         }
         else
-            JOptionPane.showMessageDialog(null,
-                                          "No ha seleccionado ningún color de la paleta para cambiar el color de la letra.",
-                                          "AVISO",
-                                          JOptionPane.INFORMATION_MESSAGE);
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void cambiarColorResaltado(int indice)
     {
-        //Obtenemos los atributos actuales del texto seleccionado:
-        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-        
-        //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
-        Color color = JColorChooser.showDialog(null, 
-                                               "Elija un color para el resaltado", 
-                                               this.listaDocumentos.get(indice).getSelectedTextColor());
-        
-        if (color != null)
+        if (!this.listaDocumentos.isEmpty())
         {
-            //Cambiamos el color del fondo del texto:
-            StyleConstants.setBackground(atributos, color);
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
 
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }else
-            JOptionPane.showMessageDialog(null,
-                                          "No ha seleccionado ningún color de la paleta para cambiar el color del resaltado.",
-                                          "AVISO",
-                                          JOptionPane.INFORMATION_MESSAGE);
+            //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
+            Color color = JColorChooser.showDialog(null, 
+                                                   "Elija un color para el resaltado", 
+                                                   this.listaDocumentos.get(indice).getSelectedTextColor());
+
+            if (color != null)
+            {
+                //Cambiamos el color del fondo del texto:
+                StyleConstants.setBackground(atributos, color);
+
+                //Damos los nuevos atributos al texto:
+                this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+
+                //Ponemos el foco en el documento para mejor UX:
+                this.listaDocumentos.get(indice).requestFocus();
+            }else
+                JOptionPane.showMessageDialog(null,
+                                              "No ha seleccionado ningún color de la paleta para cambiar el color del resaltado.",
+                                              "AVISO",
+                                              JOptionPane.INFORMATION_MESSAGE);
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void cambiarFuente(int indice, Object valorSeleccionado)
@@ -546,6 +570,30 @@ public class GestorEventosEditor
 
             //Cambiamos el tamaño de la fuente del texto:
             StyleConstants.setFontSize(atributos, Integer.parseInt(String.valueOf(valorSeleccionado)));
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
+    }
+    
+    public void tacharTexto(int indice)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+
+            //Cambiamos el atributo para que tache el texto:
+            StyleConstants.setStrikeThrough(atributos, true);
 
             //Damos los nuevos atributos al texto:
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
