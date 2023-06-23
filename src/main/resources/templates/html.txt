@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Título de la página</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body>
+        <div>
+            <!-- Aquí va el código de la página -->
+        </div>
+    </body>
+</html>

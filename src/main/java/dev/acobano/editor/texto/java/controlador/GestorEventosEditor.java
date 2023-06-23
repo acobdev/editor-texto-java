@@ -45,7 +45,7 @@ public class GestorEventosEditor
         this.listaDocumentos = new ArrayList<>();
         this.listaArchivosAbiertos = new ArrayList<>();
         this.listaManager = new ArrayList<>();
-        this.contador = 1;
+        this.contador = 0;
     }
     
     
@@ -73,14 +73,63 @@ public class GestorEventosEditor
         PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc, menuContextual);
         
         if (this.listaDocumentos.isEmpty())
-            this.contador = 1;
+            this.contador = 0;
         
+        this.contador++;
         panelPestanas.crearPestana("Documento " + this.contador, doc, this.listaDocumentos, this.listaManager, piePagina);
         panelPestanas.setSelectedIndex(this.listaDocumentos.size());
         panelPestanas.setVisible(true);
         this.listaDocumentos.add(panelTexto);
         this.listaManager.add(manager);
+    }
+    
+    public void crearDocumentoHTML(PanelConPestanasCerrable panelPestanas, 
+                               JPanel piePagina, 
+                               JLabel etqCursor, 
+                               JLabel etqDoc,
+                               JPopupMenu menuContextual)
+    {
+        JTextPane panelTexto = new JTextPane();
+        UndoManager manager = new UndoManager();
+        
+        //Cambiamos el tipo de contenido del JTextPane a HTML:
+        panelTexto.setContentType("text/html");
+        PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc, menuContextual);
+          
+        try
+        {          
+            //Empleamos un Input Stream para traer la información del archivo:
+            FileReader lectorArchivo = new FileReader("src/main/resources/templates/html.txt");
+            BufferedReader flujoEntrada = new BufferedReader(lectorArchivo);
+            String linea = "";
+        
+            //Leemos línea a línea del archivo y lo almacenamos en el String:
+            while (linea != null)
+            {
+                linea = flujoEntrada.readLine();
+
+                if (linea != null)
+                {
+                    Document d = panelTexto.getDocument();
+                    d.insertString(d.getLength(), linea + "\n", null);
+                }
+            }
+            
+            //Cerramos los streams:
+            flujoEntrada.close();
+            lectorArchivo.close();
+        }
+        catch (Exception ex) {}
+        
+        if (this.listaDocumentos.isEmpty())
+            this.contador = 0;
+                              
         this.contador++;
+        panelPestanas.crearPestana("Documento " + this.contador, doc, this.listaDocumentos, this.listaManager, piePagina);
+        panelPestanas.setSelectedIndex(this.listaDocumentos.size());
+        panelPestanas.setVisible(true);                    
+        this.listaDocumentos.add(panelTexto);
+        this.listaManager.add(manager);
     }
     
     public void abrirDocumento(PanelConPestanasCerrable panelPestanas, 
@@ -115,7 +164,8 @@ public class GestorEventosEditor
                     PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc, menuContextual);
                     
                     //Empleamos un Input Stream para traer la información del archivo:
-                    BufferedReader flujoEntrada = new BufferedReader(new FileReader(f.getPath()));
+                    FileReader lectorArchivo = new FileReader(f.getPath());
+                    BufferedReader flujoEntrada = new BufferedReader(lectorArchivo);
                     String linea = "";
                     
                     //Leemos línea a línea del archivo y lo almacenamos en el String:
@@ -125,7 +175,7 @@ public class GestorEventosEditor
                         
                         if (linea != null)
                         {
-                            Document d = doc.getDocumento().getDocument();
+                            Document d = panelTexto.getDocument();
                             d.insertString(d.getLength(), linea + "\n", null);
                         }
                     }
@@ -158,8 +208,18 @@ public class GestorEventosEditor
             catch (IOException | BadLocationException ex) 
             {
                 Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ex);
+                
+                JOptionPane.showMessageDialog(null, 
+                                          "Ha ocurrido un error inesperado en el proceso de lectura.", 
+                                          "ERROR", 
+                                          JOptionPane.ERROR_MESSAGE);
             }
         }
+        else
+            JOptionPane.showMessageDialog(null,
+                                              "No ha seleccionado ningún archivo que abrir en este momento.",
+                                              "AVISO",
+                                              JOptionPane.INFORMATION_MESSAGE);
     }
     
     public void guardarDocumento(PanelConPestanasCerrable panelPestanas)
@@ -303,7 +363,7 @@ public class GestorEventosEditor
                 //Avisamos al usuario que el procedimiento de guardado ha sido exitoso:
                 JOptionPane.showMessageDialog(null, 
                                               "El documento " + ficheroAGuardar.getName() +
-                                              " ha sido guardado exitosamente en la ruta: " + ficheroAGuardar.getAbsolutePath(), 
+                                              " ha sido guardado exitosamente en la ruta:\n" + rutaFichero, 
                                               "ARCHIVO GUARDADO", 
                                               JOptionPane.INFORMATION_MESSAGE);
             }
@@ -695,7 +755,7 @@ public class GestorEventosEditor
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "No hay ningún documento abierto actualmente en el que poder insertar una tabla.", 
                                           "ERROR", 
                                           JOptionPane.WARNING_MESSAGE);
     }
@@ -784,6 +844,53 @@ public class GestorEventosEditor
             //Ponemos el foco en el documento para mejor UX:
             this.listaDocumentos.get(indice).requestFocus();
         }
+    }
+    
+    public void buscarEnTexto(int indice)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Ejecutamos un JOptionPane con un JTextField donde el usuario
+            //pueda ingresar la palabra o texto a buscar:
+            JTextField textFieldBuscar = new JTextField();
+        
+            Object[] mensaje = {"Ingrese el texto a buscar: ", textFieldBuscar};
+
+            int opcion = JOptionPane.showOptionDialog(null, 
+                                                      mensaje, 
+                                                      "Buscar texto", 
+                                                      JOptionPane.OK_CANCEL_OPTION, 
+                                                      JOptionPane.PLAIN_MESSAGE,
+                                                      null, null, null);
+            
+            if (opcion == JOptionPane.OK_OPTION)
+            {
+                String textoBuscar = textFieldBuscar.getText();
+                String textoDocumento = this.listaDocumentos.get(indice).getText();
+                
+                //En caso de que la palabra a buscar esté en el documento,
+                //la remarcaremos con el ratón para que el usuario la encuentre:
+                if (textoDocumento.contains(textoBuscar))
+                {
+                    int cursorInicio = textoDocumento.indexOf(textoBuscar);
+                    int cursorFinal = cursorInicio + textoBuscar.length();
+                    this.listaDocumentos.get(indice).select(cursorInicio, cursorFinal);
+                    this.listaDocumentos.get(indice).requestFocus();
+                }
+                //En caso contrario, informamos al usuario que no existe:
+                else
+                    JOptionPane.showMessageDialog(null, 
+                                                  "La palabra que ha introducido para buscar no aparece en el documento seleccionado.", 
+                                                  "PALABRA NO ENCONTRADA", 
+                                                  JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente al que pueda buscar ningún texto.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void cerrarTodosDocumentos()

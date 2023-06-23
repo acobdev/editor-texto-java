@@ -75,7 +75,9 @@ public class PanelEditor extends JPanel
         //Se crean los JMenuItem de cada uno de los JMenu:
         //JMenuItem -> JMenu Archivo:
         JMenuItem itemAbrir = new JMenuItem("Abrir documento");
-        JMenuItem itemNuevo = new JMenuItem("Nuevo documento");
+        JMenu menuNuevo = new JMenu("Nuevo documento...");
+        JMenuItem itemNuevoBlanco = new JMenuItem("Nuevo documento en blanco");
+        JMenuItem itemNuevoHTML = new JMenuItem("Nuevo documento HTML");
         JMenu menuGuardar = new JMenu("Guardar...");
         JMenuItem itemGuardarTXT = new JMenuItem("Guardar como fichero TXT");
         JMenuItem itemGuardarRTF = new JMenuItem("Guardar como fichero RTF");
@@ -86,7 +88,9 @@ public class PanelEditor extends JPanel
         JMenuItem itemSalir = new JMenuItem("Salir");
         
         menuArchivo.add(itemAbrir);
-        menuArchivo.add(itemNuevo);
+        menuNuevo.add(itemNuevoBlanco);
+        menuNuevo.add(itemNuevoHTML);
+        menuArchivo.add(menuNuevo);
         menuGuardar.add(itemGuardarTXT);
         menuGuardar.add(itemGuardarRTF);
         menuGuardar.add(itemGuardarPDF);
@@ -98,15 +102,14 @@ public class PanelEditor extends JPanel
         menuArchivo.add(itemSalir);
         
         //JMenuItem -> JMenu Edición:
-        //JMenuItem buscar = new JMenuItem("Buscar...");
         JMenuItem itemDeshacer = new JMenuItem("Deshacer");
         JMenuItem itemRehacer = new JMenuItem("Rehacer");
         JMenuItem itemCortar = new JMenuItem("Cortar");
         JMenuItem itemCopiar = new JMenuItem("Copiar");
         JMenuItem itemPegar = new JMenuItem("Pegar");
         JMenuItem itemSeleccionTodo = new JMenuItem("Seleccionar todo");
+        JMenuItem itemBuscar = new JMenuItem("Buscar...");
         
-        //menuEdicion.add(buscar);
         menuEdicion.add(itemDeshacer);
         menuEdicion.add(itemRehacer);
         menuEdicion.add(new JSeparator(JSeparator.HORIZONTAL));
@@ -114,6 +117,8 @@ public class PanelEditor extends JPanel
         menuEdicion.add(itemCopiar);
         menuEdicion.add(itemPegar);
         menuEdicion.add(itemSeleccionTodo);
+        menuEdicion.add(new JSeparator(JSeparator.HORIZONTAL));
+        menuEdicion.add(itemBuscar);
         
         //JMenuItem - JMenu 'Insertar':
         JMenuItem itemImagen = new JMenuItem("Insertar imagen");
@@ -123,9 +128,14 @@ public class PanelEditor extends JPanel
         menuInsertar.add(itemTabla);
         
         //Instanciamos los eventos de click a los JMenuItems:
-        itemNuevo.addActionListener((ActionEvent e) -> {
+        itemNuevoBlanco.addActionListener((ActionEvent e) -> {
             this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
-            this.handler.getListaDocumentos().get(this.panelPestanas.getSelectedIndex()).setFont(new Font(String.valueOf(this.selectorFuente.getSelectedItem()), Font.PLAIN, (Integer) this.selectorTamano.getValue()));
+            this.handler.getListaDocumentos().get(this.getIndicePestana()).setFont(new Font(String.valueOf(this.selectorFuente.getSelectedItem()), Font.PLAIN, (Integer) this.selectorTamano.getValue()));
+        });
+        
+        itemNuevoHTML.addActionListener((ActionEvent e) -> {
+            this.handler.crearDocumentoHTML(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
+            this.handler.getListaDocumentos().get(this.getIndicePestana()).setFont(new Font(String.valueOf(this.selectorFuente.getSelectedItem()), Font.PLAIN, (Integer) this.selectorTamano.getValue()));
         });
         
         itemAbrir.addActionListener((ActionEvent e) -> {
@@ -173,6 +183,10 @@ public class PanelEditor extends JPanel
             this.handler.seleccionarTexto(this.getIndicePestana());
         });
         
+        itemBuscar.addActionListener((ActionEvent e) -> {
+            this.handler.buscarEnTexto(this.getIndicePestana());
+        });
+        
         itemImagen.addActionListener((ActionEvent e) -> {
             this.handler.insertarImagen(this.getIndicePestana());
         });
@@ -215,6 +229,7 @@ public class PanelEditor extends JPanel
         JButton btnSubindice = new JButton(new ImageIcon("src/main/resources/icons/subscript.png"));
         JButton btnSuperindice = new JButton(new ImageIcon("src/main/resources/icons/superscript.png"));
         JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
+        
         this.selectorFuente = new JComboBox(TIPOS_FUENTE);
         SpinnerListModel modelo = new SpinnerListModel(TAMANOS_FUENTE);
         modelo.setValue(14);
