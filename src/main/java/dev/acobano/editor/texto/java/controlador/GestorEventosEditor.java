@@ -26,6 +26,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 import javax.swing.undo.UndoManager;
+import org.odftoolkit.simple.TextDocument;
 
 /**
  * Clase Java encargada del área de gestión de eventos delegados desde la sección
@@ -281,26 +282,32 @@ public class GestorEventosEditor
             {
                 case TXT: 
                 {
-                    guardadorArchivo.setDialogTitle("Guardar como archivo TXT");
+                    guardadorArchivo.setDialogTitle("GUARDAR COMO ARCHIVO TXT");
                     guardadorArchivo.setFileFilter(new FileNameExtensionFilter("Archivos de texto plano TXT", "txt"));
                     break;
                 }
                 case RTF: 
                 {
-                    guardadorArchivo.setDialogTitle("Guardar como archivo RTF");
+                    guardadorArchivo.setDialogTitle("GUARDAR COMO ARCHIVO RTF");
                     guardadorArchivo.setFileFilter(new FileNameExtensionFilter("Archivos de texto con formato RTF", "rtf"));                
                     break;
                 }
                 case PDF:
                 {
-                    guardadorArchivo.setDialogTitle("Guardar como archivo PDF");
+                    guardadorArchivo.setDialogTitle("GUARDAR COMO ARCHIVO PDF");
                     guardadorArchivo.setFileFilter(new FileNameExtensionFilter("Archivos de almacenamiento digital PDF", "pdf"));
                     break;
                 }
                 case DOCX:
                 {
-                    guardadorArchivo.setDialogTitle("Guardar como archivo Word");
+                    guardadorArchivo.setDialogTitle("GUARDAR COMO ARCHIVO DOC");
                     guardadorArchivo.setFileFilter(new FileNameExtensionFilter("Archivos de texto Microsoft Word", "doc", "docx"));
+                    break;
+                }
+                case ODT:
+                {
+                    guardadorArchivo.setDialogTitle("GUARDAR COMO ARCHIVO ODT");
+                    guardadorArchivo.setFileFilter(new FileNameExtensionFilter("Archivos de texto OpenOffice Writer", "odt"));
                     break;
                 }
                 //Caso por defecto, se presiona el botón 'Guardar como'
@@ -351,6 +358,14 @@ public class GestorEventosEditor
                                 ficheroAGuardar = new File(rutaFichero + ".docx");
                     
                         this.guardarComoDOCX(panelPestanas.getSelectedIndex(), ficheroAGuardar);
+                        break;
+                    }
+                    case ODT:
+                    {
+                        if (!rutaFichero.toLowerCase().endsWith(".odt"))
+                                ficheroAGuardar = new File(rutaFichero + ".odt");
+                    
+                        this.guardarComoODT(panelPestanas.getSelectedIndex(), ficheroAGuardar);
                         break;
                     }
                     //Caso por defecto, se llama al flujo de salida básico de Java:
@@ -479,6 +494,30 @@ public class GestorEventosEditor
         catch (IOException ioe)
         {
             Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ioe);
+            
+            JOptionPane.showMessageDialog(null, 
+                                          "Ha ocurrido un error inesperado en el proceso de guardado.", 
+                                          "ERROR", 
+                                          JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public void guardarComoODT(int indice, File ficheroAGuardar)
+    {
+        try
+        {
+            //Creamos un nuevo documento ODT:
+            TextDocument doc = TextDocument.newTextDocument();
+            
+            //Agregamos el contenido del JTextPane al documento:
+            doc.addParagraph(this.listaDocumentos.get(indice).getText());
+            
+            //Guardamos el documento como un archivo ODT:
+            doc.save(ficheroAGuardar);
+        }
+        catch (Exception ex)
+        {
+            Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ex);
             
             JOptionPane.showMessageDialog(null, 
                                           "Ha ocurrido un error inesperado en el proceso de guardado.", 

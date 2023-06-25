@@ -51,5 +51,14 @@
             <artifactId>pdfbox</artifactId>
             <version>2.0.28</version>
         </dependency>
+        
+        <!-- A simple API for easy manipulation of ODF documents. -->
+        <!-- https://mvnrepository.com/artifact/org.odftoolkit/simple-odf -->
+        <dependency>
+            <groupId>org.odftoolkit</groupId>
+            <artifactId>simple-odf</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+
     </dependencies>
 </project>

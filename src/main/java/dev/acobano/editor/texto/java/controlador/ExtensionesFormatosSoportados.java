@@ -11,5 +11,6 @@ public enum ExtensionesFormatosSoportados
     RTF,
     PDF,
     DOCX,
+    ODT,
     INDEFINIDO
 }

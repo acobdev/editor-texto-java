@@ -78,12 +78,14 @@ public class PanelEditor extends JPanel
         JMenu menuNuevo = new JMenu("Nuevo documento...");
         JMenuItem itemNuevoBlanco = new JMenuItem("Nuevo documento en blanco");
         JMenuItem itemNuevoHTML = new JMenuItem("Nuevo documento HTML");
-        JMenu menuGuardar = new JMenu("Guardar...");
-        JMenuItem itemGuardarTXT = new JMenuItem("Guardar como fichero TXT");
-        JMenuItem itemGuardarRTF = new JMenuItem("Guardar como fichero RTF");
-        JMenuItem itemGuardarPDF = new JMenuItem("Guardar como fichero PDF");
+        JMenuItem itemGuardar = new JMenuItem("Guardar...");
+        JMenu menuGuardarComo = new JMenu("Guardar como...");
+        JMenuItem itemGuardarTXT = new JMenuItem("Guardar como fichero de texto plano TXT");
+        JMenuItem itemGuardarRTF = new JMenuItem("Guardar como fichero con formato RTF");
+        JMenuItem itemGuardarPDF = new JMenuItem("Guardar como fichero con formato PDF");
         JMenuItem itemGuardarDOC = new JMenuItem("Guardar como fichero Microsoft Word");
-        JMenuItem itemGuardarComo = new JMenuItem("Guardar como...");
+        JMenuItem itemGuardarODT = new JMenuItem("Guardar como fichero OpenOffice Writer");
+        JMenuItem itemImprimir = new JMenuItem("Imprimir documento");
         JMenuItem itemEliminarTodos = new JMenuItem("Cerrar todos los documentos");
         JMenuItem itemSalir = new JMenuItem("Salir");
         
@@ -91,12 +93,14 @@ public class PanelEditor extends JPanel
         menuNuevo.add(itemNuevoBlanco);
         menuNuevo.add(itemNuevoHTML);
         menuArchivo.add(menuNuevo);
-        menuGuardar.add(itemGuardarTXT);
-        menuGuardar.add(itemGuardarRTF);
-        menuGuardar.add(itemGuardarPDF);
-        menuGuardar.add(itemGuardarDOC);
-        menuArchivo.add(menuGuardar);
-        menuArchivo.add(itemGuardarComo);
+        menuArchivo.add(itemGuardar);
+        menuGuardarComo.add(itemGuardarTXT);
+        menuGuardarComo.add(itemGuardarRTF);
+        menuGuardarComo.add(itemGuardarPDF);
+        menuGuardarComo.add(itemGuardarDOC);
+        menuGuardarComo.add(itemGuardarODT);
+        menuArchivo.add(menuGuardarComo);
+        menuArchivo.add(itemImprimir);
         menuArchivo.add(new JSeparator(JSeparator.HORIZONTAL));
         menuArchivo.add(itemEliminarTodos);
         menuArchivo.add(itemSalir);
@@ -144,6 +148,10 @@ public class PanelEditor extends JPanel
             this.handler.abrirDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
         });
         
+        itemGuardar.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumento(this.panelPestanas);
+        });
+        
         itemGuardarTXT.addActionListener((ActionEvent e) -> {
             this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.TXT);
         });
@@ -160,8 +168,13 @@ public class PanelEditor extends JPanel
             this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.DOCX);
         });
         
-        itemGuardarComo.addActionListener((ActionEvent e) -> {
-            this.handler.guardarDocumentoComo(this.panelPestanas, null);
+        itemGuardarODT.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.ODT);
+        });
+        
+        itemImprimir.addActionListener((ActionEvent e) -> {
+            if (!this.handler.getListaDocumentos().isEmpty())
+                this.handler.imprimirDocumento(this.panelPestanas.getPanelDocumentoActivo());
         });
         
         itemEliminarTodos.addActionListener((ActionEvent e) -> {
@@ -531,11 +544,34 @@ public class PanelEditor extends JPanel
         menuAlineacion.add(itemCentro);
         menuAlineacion.add(itemJustificado);
         
+        //JMenuItem -> JMenu 'Portapapeles':
+        JMenu menuPortapapeles = new JMenu("Portapapeles...");
+        JMenuItem itemCortar = new JMenuItem("Cortar");
+        JMenuItem itemCopiar = new JMenuItem("Copiar");
+        JMenuItem itemPegar = new JMenuItem("Pegar");
+        
+        itemCortar.addActionListener((ActionEvent e) -> {
+            this.handler.cortarTexto(this.getIndicePestana());
+        });
+        
+        itemCopiar.addActionListener((ActionEvent e) -> {
+            this.handler.copiarTexto(this.getIndicePestana());
+        });
+        
+        itemPegar.addActionListener((ActionEvent e) -> {
+            this.handler.pegarTexto(this.getIndicePestana());
+        });
+        
+        menuPortapapeles.add(itemCortar);
+        menuPortapapeles.add(itemCopiar);
+        menuPortapapeles.add(itemPegar);
+        
         //Insertamos los JMenuItem en el JPopupMenu:
         this.menuContextual.add(menuTipoLetra);
         this.menuContextual.add(menuTamano);
         this.menuContextual.add(menuEstilo);
         this.menuContextual.add(menuAlineacion);
+        this.menuContextual.add(menuPortapapeles);
     }
     
     private void inicializarAtajosTeclado()
