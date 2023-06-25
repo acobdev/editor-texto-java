@@ -3,6 +3,7 @@ package dev.acobano.editor.texto.java.vista;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.print.*;
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.text.Document;
@@ -14,7 +15,7 @@ import javax.swing.undo.UndoManager;
  * escribir dentro de su correspondiente pestaña.
  * @author Álvaro Cobano
  */
-public class PanelDocumento extends JPanel
+public class PanelDocumento extends JPanel implements Printable
 {
     //ATRIBUTOS:
     //Componentes del panel:
@@ -96,5 +97,37 @@ public class PanelDocumento extends JPanel
     public JTextPane getDocumento()
     {
         return this.documento;
+    }
+
+    @Override
+    public int print(Graphics grphcs, PageFormat pf, int pageIndex) throws PrinterException 
+    {
+        if (pageIndex != 0)
+            return Printable.NO_SUCH_PAGE;
+        else
+        {
+            Graphics2D g = (Graphics2D) grphcs;
+            PageFormat formatoA4 = this.getFormatoA4();
+            g.translate(formatoA4.getImageableX(), formatoA4.getImageableY());
+            printAll(g);
+            
+            return Printable.PAGE_EXISTS;
+        }
+    }
+    
+    public PageFormat getFormatoA4()
+    {
+        PageFormat pf = new PageFormat();
+        Paper folio = new Paper();
+        
+        //Establecemos el tamaño del folio en A4 (72 píxeles por pulgada)
+        folio.setSize(595, 842);
+        
+        //Establecemos el área imprimible dentro del folio:
+        folio.setImageableArea(36, 36, 523, 770);
+        
+        //Pegamos el folio al formato y lo devolvemos:
+        pf.setPaper(folio);
+        return pf;
     }
 }

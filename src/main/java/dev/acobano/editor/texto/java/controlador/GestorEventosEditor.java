@@ -7,6 +7,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode;
 import org.apache.poi.xwpf.usermodel.*;
 
 import java.awt.*;
+import java.awt.print.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -1130,13 +1131,50 @@ public class GestorEventosEditor
                                               "La palabra que ha introducido para buscar no aparece en el documento seleccionado.", 
                                               "PALABRA NO ENCONTRADA", 
                                               JOptionPane.INFORMATION_MESSAGE);
-            }//En caso contrario, informamos al usuario que no existe:
+            }
+                //En caso contrario, informamos al usuario que no existe:
                 else
                     JOptionPane.showMessageDialog(null, 
                                                   "No ha seleccionado ningún texto a buscar en el documento.", 
                                                   "AVISO", 
                                                   JOptionPane.INFORMATION_MESSAGE);
             
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente al que pueda buscar ningún texto.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
+    }
+    
+    public void imprimirDocumento(PanelDocumento pDoc)
+    {
+        if (!this.listaDocumentos.isEmpty())
+        {
+            PrinterJob flujoImpresion = PrinterJob.getPrinterJob();
+            flujoImpresion.setPrintable(pDoc);
+            
+            if (flujoImpresion.printDialog())
+            {
+                try
+                {
+                    flujoImpresion.print();
+                }
+                catch (PrinterException pe)
+                {
+                    JOptionPane.showMessageDialog(null, 
+                                                  "Ha ocurrido un error inesperado en el proceso de impresión.", 
+                                                  "ERROR", 
+                                                  JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            else
+                JOptionPane.showMessageDialog(null, 
+                                              "El proceso de impresión ha sido cancelado.", 
+                                              "AVISO", 
+                                              JOptionPane.INFORMATION_MESSAGE);
+                
         }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
