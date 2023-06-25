@@ -8,18 +8,21 @@ import org.apache.poi.xwpf.usermodel.*;
 
 import java.awt.*;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.*;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.StyledEditorKit;
 import javax.swing.text.rtf.RTFEditorKit;
 import javax.swing.undo.UndoManager;
 
@@ -300,7 +303,7 @@ public class GestorEventosEditor
                     break;
                 }
                 //Caso por defecto, se presiona el botón 'Guardar como'
-                default:
+                case INDEFINIDO:
                     guardadorArchivo.setDialogTitle("Guardar como...");              
             }
         
@@ -350,7 +353,7 @@ public class GestorEventosEditor
                         break;
                     }
                     //Caso por defecto, se llama al flujo de salida básico de Java:
-                    default:
+                    case INDEFINIDO:
                         this.escribirArchivo(this.listaArchivosAbiertos.size(), ficheroAGuardar);
                 }
                  
@@ -597,7 +600,7 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void cambiarFuente(int indice, Object valorSeleccionado)
+    public void cambiarFuente(int indice, Object nombreFuente)
     {
         if (!this.listaDocumentos.isEmpty())
         {
@@ -605,7 +608,7 @@ public class GestorEventosEditor
             SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
 
             //Cambiamos la familia de la fuente del texto:
-            StyleConstants.setFontFamily(atributos, String.valueOf(valorSeleccionado));
+            StyleConstants.setFontFamily(atributos, String.valueOf(nombreFuente));
 
             //Damos los nuevos atributos al texto:
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
@@ -621,7 +624,7 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void cambiarTamanoFuente(int indice, Object valorSeleccionado)
+    public void cambiarTamanoFuente(int indice, Object tamanoFuente)
     {
         if (!this.listaDocumentos.isEmpty())
         {
@@ -629,7 +632,7 @@ public class GestorEventosEditor
             SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
 
             //Cambiamos el tamaño de la fuente del texto:
-            StyleConstants.setFontSize(atributos, Integer.parseInt(String.valueOf(valorSeleccionado)));
+            StyleConstants.setFontSize(atributos, Integer.parseInt(String.valueOf(tamanoFuente)));
 
             //Damos los nuevos atributos al texto:
             this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
@@ -729,22 +732,16 @@ public class GestorEventosEditor
                 int numFilas = (int) selectorFilas.getValue();
                 int numColumnas = (int) selectorColumnas.getValue();
                 
-                //Creamos una JTable con las filas y columnas pedidas por el usuario:
-                TableModel modelo = new AbstractTableModel() {
-                    @Override
-                    public int getRowCount() { return numFilas; }
-
-                    @Override
-                    public int getColumnCount() { return numColumnas; }
-
-                    @Override
-                    public Object getValueAt(int row, int col) { return numFilas * numColumnas; }
-                    
-                };
-                JTable tabla = new JTable(modelo);
+                //Creamos una JTable con las filas y columnas obtenidas:
+                JTable tabla = new JTable(numFilas, numColumnas);
                 
-                //Insertamos el JTable en su respectivo panel:
-                this.listaDocumentos.get(indice).add(new JScrollPane(tabla), BorderLayout.CENTER);
+                //Cambiamos los valores de estilo para que sea más visible:
+                tabla.setBorder(new LineBorder(Color.BLACK));
+                tabla.setFont(new Font((String) fuente, Font.PLAIN, (int) tamano));
+                tabla.getColumnModel().getColumn(0).setPreferredWidth(90);
+                
+                //Insertamos la tabla en el documento:
+                this.listaDocumentos.get(indice).insertComponent(tabla);
             }
             else
                 JOptionPane.showMessageDialog(null, 
@@ -760,54 +757,293 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action cortarTexto()
+    public void insertarHiperenlace(int indice)
     {
-        return new StyledEditorKit.CutAction();
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Ejecutamos un JOptionPane con un JTextField donde el usuario
+            //pueda ingresar la URL del hiperenlace a insertar:
+            JTextField textFieldURL = new JTextField();
+        
+            Object[] mensaje = {"Ingrese la URL del hiperenlace: ", textFieldURL};
+
+            int opcion = JOptionPane.showOptionDialog(null, 
+                                                      mensaje, 
+                                                      "Buscar texto", 
+                                                      JOptionPane.OK_CANCEL_OPTION, 
+                                                      JOptionPane.PLAIN_MESSAGE,
+                                                      null, null, null);
+
+            if (opcion == JOptionPane.OK_OPTION)
+            {
+                String textoURL = textFieldURL.getText();
+                
+                if (!textoURL.equals(""))
+                {
+                    //Creamos un HyperlinkListener y lo asignamos al JTextPane activo:
+                    this.listaDocumentos.get(indice).addHyperlinkListener(e -> {
+                        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+                        {
+                            String url = e.getURL().toString();
+                            
+                            try 
+                            {
+                                Desktop.getDesktop().browse(new URI(url));
+                            } 
+                            catch (IOException | URISyntaxException ex) {
+                                Logger.getLogger(GestorEventosEditor.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+                    
+                    //Insertamos el hiperenlace en el JTextPane mediante la clase 'SimpleAttributeSet':
+                    SimpleAttributeSet atributo = new SimpleAttributeSet();
+                    StyleConstants.setForeground(atributo, Color.BLUE);
+                    StyleConstants.setUnderline(atributo, true);
+                    this.listaDocumentos.get(indice).setCharacterAttributes(atributo, false);
+                    
+                    try {
+                        HyperlinkEvent evento = new HyperlinkEvent(this.listaDocumentos.get(indice),
+                                HyperlinkEvent.EventType.ACTIVATED,
+                                new URL(textoURL));
+                    
+                        //Agregamos el hiperenlace:
+                        this.listaDocumentos.get(indice)
+                                .getStyledDocument()
+                                .insertString(this.listaDocumentos
+                                              .get(indice)
+                                              .getStyledDocument()
+                                              .getLength(),
+                                        evento.getDescription(),
+                                        atributo);
+                    }
+                    catch (MalformedURLException me)
+                    {
+                        JOptionPane.showMessageDialog(null, 
+                                                      "La URL que ha introducido no es válida.", 
+                                                      "ERROR",
+                                                      JOptionPane.ERROR_MESSAGE);
+                    } catch (BadLocationException ex) {
+                        Logger.getLogger(GestorEventosEditor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                else
+                    JOptionPane.showMessageDialog(null, 
+                                                  "No es posible insertar un hiperenlace sin URL.", 
+                                                  "ERROR",
+                                                  JOptionPane.WARNING_MESSAGE);
+            }
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente en el que poder insertar un hiperenlace.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action copiarTexto()
+    public void cortarTexto(int indice)
     {
-        return new StyledEditorKit.CopyAction();
+        if (!this.listaDocumentos.isEmpty())
+            this.listaDocumentos.get(indice).cut();
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action pegarTexto()
+    public void copiarTexto(int indice)
     {
-        return new StyledEditorKit.PasteAction();
+        if (!this.listaDocumentos.isEmpty())
+            this.listaDocumentos.get(indice).copy();
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action alinearTextoIzquierda()
+    public void pegarTexto(int indice)
     {
-        return new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT);
+        if (!this.listaDocumentos.isEmpty())
+            this.listaDocumentos.get(indice).paste();
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action alinearTextoDerecha()
+    public void alinearTextoIzquierda(int indice)
     {
-        return new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT);
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            
+            //Creamos el estilo de cursiva para el texto:
+            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_LEFT);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action centrarTexto()
+    public void alinearTextoDerecha(int indice)
     {
-        return new StyledEditorKit.AlignmentAction("Centro", StyleConstants.ALIGN_CENTER);
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            
+            //Creamos el estilo de cursiva para el texto:
+            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_RIGHT);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action justificarTexto()
+    public void centrarTexto(int indice)
     {
-        return new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED);
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            
+            //Creamos el estilo de cursiva para el texto:
+            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_CENTER);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action escribirNegrita()
+    public void justificarTexto(int indice)
     {
-        return new StyledEditorKit.BoldAction();
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            
+            //Creamos el estilo de cursiva para el texto:
+            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_JUSTIFIED);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action escribirCursiva()
+    public void escribirNegrita(int indice)
     {
-        return new StyledEditorKit.ItalicAction();
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            
+            //Creamos el estilo de cursiva para el texto:
+            StyleConstants.setBold(atributos, true);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
-    public Action escribirSubrayado()
+    public void escribirCursiva(int indice)
+    {        
+        if (!this.listaDocumentos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            
+            //Creamos el estilo de cursiva para el texto:
+            StyleConstants.setItalic(atributos, true);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
+    }
+    
+    public void escribirSubrayado(int indice)
     {
-        return new StyledEditorKit.UnderlineAction();
+        if (!this.listaArchivosAbiertos.isEmpty())
+        {
+            //Obtenemos los atributos actuales del texto seleccionado:
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            
+            //Creamos el estilo de subrayado para el texto:
+            StyleConstants.setUnderline(atributos, true);
+
+            //Damos los nuevos atributos al texto:
+            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            
+            //Ponemos el foco en el documento para mejor UX:
+            this.listaDocumentos.get(indice).requestFocus();
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void escribirSuperindice(int indice)
@@ -826,6 +1062,12 @@ public class GestorEventosEditor
             //Ponemos el foco en el documento para mejor UX:
             this.listaDocumentos.get(indice).requestFocus();
         }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void escribirSubindice(int indice)
@@ -844,6 +1086,12 @@ public class GestorEventosEditor
             //Ponemos el foco en el documento para mejor UX:
             this.listaDocumentos.get(indice).requestFocus();
         }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
+                                          "ERROR", 
+                                          JOptionPane.WARNING_MESSAGE);
     }
     
     public void buscarEnTexto(int indice)
@@ -858,7 +1106,7 @@ public class GestorEventosEditor
 
             int opcion = JOptionPane.showOptionDialog(null, 
                                                       mensaje, 
-                                                      "Buscar texto", 
+                                                      "BUSCAR TEXTO", 
                                                       JOptionPane.OK_CANCEL_OPTION, 
                                                       JOptionPane.PLAIN_MESSAGE,
                                                       null, null, null);
@@ -877,13 +1125,18 @@ public class GestorEventosEditor
                     this.listaDocumentos.get(indice).select(cursorInicio, cursorFinal);
                     this.listaDocumentos.get(indice).requestFocus();
                 }
-                //En caso contrario, informamos al usuario que no existe:
+                else
+                JOptionPane.showMessageDialog(null, 
+                                              "La palabra que ha introducido para buscar no aparece en el documento seleccionado.", 
+                                              "PALABRA NO ENCONTRADA", 
+                                              JOptionPane.INFORMATION_MESSAGE);
+            }//En caso contrario, informamos al usuario que no existe:
                 else
                     JOptionPane.showMessageDialog(null, 
-                                                  "La palabra que ha introducido para buscar no aparece en el documento seleccionado.", 
-                                                  "PALABRA NO ENCONTRADA", 
+                                                  "No ha seleccionado ningún texto a buscar en el documento.", 
+                                                  "AVISO", 
                                                   JOptionPane.INFORMATION_MESSAGE);
-            }
+            
         }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:

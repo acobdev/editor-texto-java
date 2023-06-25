@@ -123,9 +123,11 @@ public class PanelEditor extends JPanel
         //JMenuItem - JMenu 'Insertar':
         JMenuItem itemImagen = new JMenuItem("Insertar imagen");
         JMenuItem itemTabla = new JMenuItem("Insertar tabla");
+        JMenuItem itemHiperenlace = new JMenuItem("Insertar hiperenlace");
         
         menuInsertar.add(itemImagen);
         menuInsertar.add(itemTabla);
+        menuInsertar.add(itemHiperenlace);
         
         //Instanciamos los eventos de click a los JMenuItems:
         itemNuevoBlanco.addActionListener((ActionEvent e) -> {
@@ -197,9 +199,21 @@ public class PanelEditor extends JPanel
                                        this.selectorTamano.getValue());
         });
         
-        itemCortar.addActionListener(this.handler.cortarTexto());
-        itemCopiar.addActionListener(this.handler.copiarTexto());
-        itemPegar.addActionListener(this.handler.pegarTexto());
+        itemHiperenlace.addActionListener((ActionEvent e) -> {
+            this.handler.insertarHiperenlace(this.getIndicePestana());
+        });
+        
+        itemCortar.addActionListener((ActionEvent e) -> {
+            this.handler.cortarTexto(this.getIndicePestana());
+        });
+        
+        itemCopiar.addActionListener((ActionEvent e) -> {
+            this.handler.copiarTexto(this.getIndicePestana());
+        });
+        
+        itemPegar.addActionListener((ActionEvent e) -> {
+            this.handler.pegarTexto(this.getIndicePestana());
+        });
     }
         
     private void inicializarMenuHerramientas()
@@ -305,7 +319,7 @@ public class PanelEditor extends JPanel
         });
         
         btnGuardarComo.addActionListener((ActionEvent e) -> {
-            this.handler.guardarDocumentoComo(this.panelPestanas, null);
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.INDEFINIDO);
         });
         
         btnDeshacer.addActionListener((ActionEvent e) -> {
@@ -332,16 +346,45 @@ public class PanelEditor extends JPanel
             this.handler.cambiarColorResaltado(this.getIndicePestana());
         });
         
-        btnCortar.addActionListener(this.handler.cortarTexto());
-        btnCopiar.addActionListener(this.handler.copiarTexto());
-        btnPegar.addActionListener(this.handler.pegarTexto());
-        btnNegrita.addActionListener(this.handler.escribirNegrita());
-        btnCursiva.addActionListener(this.handler.escribirCursiva());
-        btnSubrayado.addActionListener(this.handler.escribirSubrayado());
-        btnIzqda.addActionListener(this.handler.alinearTextoIzquierda());
-        btnCentro.addActionListener(this.handler.centrarTexto());
-        btnDerecha.addActionListener(this.handler.alinearTextoDerecha());
-        btnJustificado.addActionListener(this.handler.justificarTexto());
+        btnCortar.addActionListener((ActionEvent e) -> {
+            this.handler.cortarTexto(this.getIndicePestana());
+        });
+        
+        btnCopiar.addActionListener((ActionEvent e) -> {
+            this.handler.copiarTexto(this.getIndicePestana());
+        });
+        
+        btnPegar.addActionListener((ActionEvent e) -> {
+            this.handler.pegarTexto(this.getIndicePestana());
+        });
+        
+        btnNegrita.addActionListener((ActionEvent e) -> {
+            this.handler.escribirNegrita(this.getIndicePestana());
+        });
+        
+        btnCursiva.addActionListener((ActionEvent e) -> {
+            this.handler.escribirCursiva(this.getIndicePestana());
+        });
+        
+        btnSubrayado.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSubrayado(this.getIndicePestana());
+        });
+        
+        btnIzqda.addActionListener((ActionEvent e) -> {
+            this.handler.alinearTextoIzquierda(this.getIndicePestana());
+        });
+        
+        btnCentro.addActionListener((ActionEvent e) -> {
+            this.handler.centrarTexto(this.getIndicePestana());
+        });
+        
+        btnDerecha.addActionListener((ActionEvent e) -> {
+            this.handler.alinearTextoDerecha(this.getIndicePestana());
+        });
+        
+        btnJustificado.addActionListener((ActionEvent e) -> {
+            this.handler.justificarTexto(this.getIndicePestana());
+        });
         
         selectorFuente.addItemListener((ItemEvent ie) -> {
             this.handler.cambiarFuente(this.getIndicePestana(), selectorFuente.getSelectedItem());
@@ -428,9 +471,17 @@ public class PanelEditor extends JPanel
         JMenuItem itemSubindice = new JMenuItem("Subíndice");
         JMenuItem itemSuperindice = new JMenuItem("Superíndice");
         
-        itemNegrita.addActionListener(this.handler.escribirNegrita());
-        itemCursiva.addActionListener(this.handler.escribirCursiva());
-        itemSubrayado.addActionListener(this.handler.escribirSubrayado());
+        itemNegrita.addActionListener((ActionEvent e) -> {
+            this.handler.escribirNegrita(this.getIndicePestana());
+        });
+        
+        itemCursiva.addActionListener((ActionEvent e) -> {
+            this.handler.escribirCursiva(this.getIndicePestana());
+        });
+        
+        itemSubrayado.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSubrayado(this.getIndicePestana());
+        });
         
         itemTachado.addActionListener((ActionEvent e) -> {
                 this.handler.tacharTexto(this.getIndicePestana());
@@ -459,10 +510,21 @@ public class PanelEditor extends JPanel
         JMenuItem itemCentro = new JMenuItem("Centrado");
         JMenuItem itemJustificado = new JMenuItem("Justificado");
         
-        itemIzqda.addActionListener(this.handler.alinearTextoIzquierda());
-        itemCentro.addActionListener(this.handler.centrarTexto());
-        itemDcha.addActionListener(this.handler.alinearTextoDerecha());
-        itemJustificado.addActionListener(this.handler.justificarTexto());
+        itemIzqda.addActionListener((ActionEvent e) -> {
+            this.handler.alinearTextoIzquierda(this.getIndicePestana());
+        });
+        
+        itemCentro.addActionListener((ActionEvent e) -> {
+            this.handler.centrarTexto(this.getIndicePestana());
+        });
+        
+        itemDcha.addActionListener((ActionEvent e) -> {
+            this.handler.alinearTextoDerecha(this.getIndicePestana());
+        });
+        
+        itemJustificado.addActionListener((ActionEvent e) -> {
+            this.handler.justificarTexto(this.getIndicePestana());
+        });
         
         menuAlineacion.add(itemIzqda);
         menuAlineacion.add(itemDcha);
@@ -529,6 +591,28 @@ public class PanelEditor extends JPanel
             }
         };
         
+        Action accionNegrita = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.escribirNegrita(getIndicePestana());
+            }
+            
+        };
+        
+        Action accionCursiva = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.escribirCursiva(getIndicePestana());
+            }           
+        };
+        
+        Action accionSubrayar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.escribirSubrayado(getIndicePestana());
+            }            
+        };
+        
         Action accionTachar = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -558,6 +642,27 @@ public class PanelEditor extends JPanel
             }
         };
         
+        Action accionCortar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.cortarTexto(getIndicePestana());
+            }            
+        };
+        
+        Action accionCopiar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.copiarTexto(getIndicePestana());
+            }            
+        };
+        
+        Action accionPegar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.pegarTexto(getIndicePestana());
+            }            
+        };
+        
         Action accionSubindice = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -570,6 +675,34 @@ public class PanelEditor extends JPanel
             public void actionPerformed(ActionEvent ae) {
                 handler.escribirSuperindice(getIndicePestana());
             }
+        };
+        
+        Action accionAlinearIzda = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.alinearTextoIzquierda(getIndicePestana());
+            }            
+        };
+        
+        Action accionAlinearDcha = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.alinearTextoDerecha(getIndicePestana());
+            }            
+        };
+        
+        Action accionCentrar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.centrarTexto(getIndicePestana());
+            }            
+        };
+        
+        Action accionJustificar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.justificarTexto(getIndicePestana());
+            }            
         };
         
         //Asignamos los atajos de teclado al manejador mediante el mapa de entrada:
@@ -602,17 +735,17 @@ public class PanelEditor extends JPanel
         this.getActionMap().put("rehacer", accionRehacer);
         this.getActionMap().put("subindice", accionSubindice);
         this.getActionMap().put("superindice", accionSuperindice);
-        this.getActionMap().put("negrita", this.handler.escribirNegrita());
-        this.getActionMap().put("cursiva", this.handler.escribirCursiva());
-        this.getActionMap().put("subrayado", this.handler.escribirSubrayado());
+        this.getActionMap().put("negrita", accionNegrita);
+        this.getActionMap().put("cursiva", accionCursiva);
+        this.getActionMap().put("subrayado", accionSubrayar);
         this.getActionMap().put("tachado", accionTachar);
-        this.getActionMap().put("cortar", this.handler.cortarTexto());
-        this.getActionMap().put("copiar", this.handler.copiarTexto());
-        this.getActionMap().put(("pegar"), this.handler.pegarTexto());
-        this.getActionMap().put("alinearIzda", this.handler.alinearTextoIzquierda());
-        this.getActionMap().put("alinearDcha", this.handler.alinearTextoDerecha());
-        this.getActionMap().put("centrar", this.handler.centrarTexto());
-        this.getActionMap().put("justificar", this.handler.justificarTexto());
+        this.getActionMap().put("cortar", accionCortar);
+        this.getActionMap().put("copiar", accionCopiar);
+        this.getActionMap().put(("pegar"), accionPegar);
+        this.getActionMap().put("alinearIzda", accionAlinearIzda);
+        this.getActionMap().put("alinearDcha", accionAlinearDcha);
+        this.getActionMap().put("centrar", accionCentrar);
+        this.getActionMap().put("justificar", accionJustificar);
     }
     
     
