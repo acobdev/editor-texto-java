@@ -20,6 +20,7 @@ public class PanelEditor extends JPanel
     private JToolBar menuHerramientas;
     private PanelConPestanasCerrable panelPestanas;
     private JPanel piePagina;
+            //panelMenuHerramientas;
     private JPopupMenu menuContextual;
     
     //Componentes secundarios:
@@ -65,11 +66,13 @@ public class PanelEditor extends JPanel
         //Se crean los JMenu que estarán dentro del JMenuBar:
         JMenu menuArchivo = new JMenu("Archivo");
         JMenu menuEdicion = new JMenu("Edición");
+        JMenu menuFormato = new JMenu("Formato");
         JMenu menuInsertar = new JMenu ("Insertar");
         
         //Se insertan los JMenu en el JMenuBar:
         this.barraNavegacion.add(menuArchivo);
         this.barraNavegacion.add(menuEdicion);
+        this.barraNavegacion.add(menuFormato);
         this.barraNavegacion.add(menuInsertar);
         
         //Se crean los JMenuItem de cada uno de los JMenu:
@@ -78,7 +81,7 @@ public class PanelEditor extends JPanel
         JMenu menuNuevo = new JMenu("Nuevo documento...");
         JMenuItem itemNuevoBlanco = new JMenuItem("Nuevo documento en blanco");
         JMenuItem itemNuevoHTML = new JMenuItem("Nuevo documento HTML");
-        JMenuItem itemGuardar = new JMenuItem("Guardar...");
+        JMenuItem itemGuardar = new JMenuItem("Guardar documento...");
         JMenu menuGuardarComo = new JMenu("Guardar como...");
         JMenuItem itemGuardarTXT = new JMenuItem("Guardar como fichero de texto plano TXT");
         JMenuItem itemGuardarRTF = new JMenuItem("Guardar como fichero con formato RTF");
@@ -123,6 +126,22 @@ public class PanelEditor extends JPanel
         menuEdicion.add(itemSeleccionTodo);
         menuEdicion.add(new JSeparator(JSeparator.HORIZONTAL));
         menuEdicion.add(itemBuscar);
+        
+        //JMenuItem - JMenu 'Formato':
+        JMenuItem itemNegrita = new JMenuItem("Negrita");
+        JMenuItem itemCursiva = new JMenuItem("Cursiva");
+        JMenuItem itemSubrayado = new JMenuItem("Subrayado");
+        JMenuItem itemTachado = new JMenuItem("Tachado");
+        JMenuItem itemSubindice = new JMenuItem("Subíndice");
+        JMenuItem itemSuperindice = new JMenuItem("Superíndice");
+        
+        menuFormato.add(itemNegrita);
+        menuFormato.add(itemCursiva);
+        menuFormato.add(itemSubrayado);
+        menuFormato.add(itemTachado);
+        menuFormato.add(new JSeparator(JSeparator.HORIZONTAL));
+        menuFormato.add(itemSubindice);
+        menuFormato.add(itemSuperindice);
         
         //JMenuItem - JMenu 'Insertar':
         JMenuItem itemImagen = new JMenuItem("Insertar imagen");
@@ -202,6 +221,22 @@ public class PanelEditor extends JPanel
             this.handler.buscarEnTexto(this.getIndicePestana());
         });
         
+        itemNegrita.addActionListener(new StyledEditorKit.BoldAction());
+        itemCursiva.addActionListener(new StyledEditorKit.ItalicAction());
+        itemSubrayado.addActionListener(new StyledEditorKit.UnderlineAction());
+        
+        itemTachado.addActionListener((ActionEvent e) -> {
+            this.handler.tacharTexto(this.getIndicePestana());
+        });
+        
+        itemSubindice.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSubindice(this.getIndicePestana());
+        });
+        
+        itemSuperindice.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSuperindice(this.getIndicePestana());
+        });
+        
         itemImagen.addActionListener((ActionEvent e) -> {
             this.handler.insertarImagen(this.getIndicePestana());
         });
@@ -231,90 +266,117 @@ public class PanelEditor extends JPanel
         
     private void inicializarMenuHerramientas()
     {
+        //Inicializamos el JToolBar:
         this.menuHerramientas = new JToolBar(JToolBar.HORIZONTAL);
         this.menuHerramientas.setFloatable(false);
         this.menuHerramientas.setVisible(true);
         
-        //Instanciamos los botones del menú:
-        JButton btnNuevo = new JButton(new ImageIcon("src/main/resources/icons/text.png"));
-        JButton btnAbrir = new JButton(new ImageIcon("src/main/resources/icons/file.png"));
+        //Instanciamos los botones del panel de menú:
+        JButton btnNuevo = new JButton(new ImageIcon("src/main/resources/icons/new.png"));
+        JButton btnAbrir = new JButton(new ImageIcon("src/main/resources/icons/open.png"));
         JButton btnGuardar = new JButton(new ImageIcon("src/main/resources/icons/save.png"));
-        JButton btnGuardarComo = new JButton(new ImageIcon("src/main/resources/icons/saveas.png"));     
-        JButton btnDeshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
-        JButton btnRehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
+        JButton btnGuardarComo = new JButton(new ImageIcon("src/main/resources/icons/saveas.png"));   
+        JButton btnGuardarTXT = new JButton(new ImageIcon("src/main/resources/icons/saveastext.png"));
+        JButton btnGuardarPDF = new JButton(new ImageIcon("src/main/resources/icons/saveaspdf.png"));
         JButton btnCortar = new JButton(new ImageIcon("src/main/resources/icons/cut.png"));
         JButton btnCopiar = new JButton(new ImageIcon("src/main/resources/icons/copy.png"));
-        JButton btnPegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));        
+        JButton btnPegar = new JButton(new ImageIcon("src/main/resources/icons/paste.png"));
+        JButton btnDeshacer = new JButton(new ImageIcon("src/main/resources/icons/undo.png"));
+        JButton btnRehacer = new JButton(new ImageIcon("src/main/resources/icons/redo.png"));
+        JButton btnImagen = new JButton(new ImageIcon("src/main/resources/icons/addimage.png"));
+        JButton btnTabla = new JButton(new ImageIcon("src/main/resources/icons/addtable.png"));
+        JButton btnURL = new JButton(new ImageIcon("src/main/resources/icons/hyperlink.png"));
+        JButton btnBuscar = new JButton(new ImageIcon("src/main/resources/icons/search.png"));
+        JButton btnImprimir = new JButton(new ImageIcon("src/main/resources/icons/print.png"));
         JButton btnNegrita = new JButton(new ImageIcon("src/main/resources/icons/bold.png"));
         JButton btnCursiva = new JButton(new ImageIcon("src/main/resources/icons/italics.png"));
         JButton btnSubrayado = new JButton(new ImageIcon("src/main/resources/icons/underlined.png"));
-        JButton btnResaltado = new JButton(new ImageIcon("src/main/resources/icons/marker.png"));
+        JButton btnTachado = new JButton(new ImageIcon("src/main/resources/icons/strikethrough.png"));
+        JButton btnSubindice = new JButton(new ImageIcon("src/main/resources/icons/subscript.png"));
+        JButton btnSuperindice = new JButton(new ImageIcon("src/main/resources/icons/superscript.png"));
         JButton btnIzqda = new JButton(new ImageIcon("src/main/resources/icons/alignleft.png"));
         JButton btnCentro = new JButton(new ImageIcon("src/main/resources/icons/aligncenter.png"));
         JButton btnDerecha = new JButton(new ImageIcon("src/main/resources/icons/alignright.png"));
         JButton btnJustificado = new JButton(new ImageIcon("src/main/resources/icons/alignjustify.png"));
-        JButton btnSubindice = new JButton(new ImageIcon("src/main/resources/icons/subscript.png"));
-        JButton btnSuperindice = new JButton(new ImageIcon("src/main/resources/icons/superscript.png"));
-        JButton btnSelectorColor = new JButton(new ImageIcon("src/main/resources/icons/color.png"));
+        JButton btnColor = new JButton(new ImageIcon("src/main/resources/icons/brush.png"));        
+        JButton btnResaltado = new JButton(new ImageIcon("src/main/resources/icons/marker.png"));
         
         this.selectorFuente = new JComboBox(TIPOS_FUENTE);
+        this.selectorFuente.setPreferredSize(new Dimension(160, 48));
         SpinnerListModel modelo = new SpinnerListModel(TAMANOS_FUENTE);
         modelo.setValue(14);
         this.selectorTamano = new JSpinner(modelo);
-        this.selectorTamano.setPreferredSize(new Dimension(46, 64));
+        this.selectorTamano.setPreferredSize(new Dimension(30, 48));
         
-        //Pegamos estos nuevos componentes en el menú:       
-        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        this.menuHerramientas.add(selectorFuente);
-        this.menuHerramientas.add(selectorTamano);
-        this.menuHerramientas.add(btnSelectorColor);
+        //Pegamos estos nuevos componentes en el menú:
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnNuevo);
         this.menuHerramientas.add(btnAbrir);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnGuardar);
         this.menuHerramientas.add(btnGuardarComo);
+        this.menuHerramientas.add(btnGuardarTXT);
+        this.menuHerramientas.add(btnGuardarPDF);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        this.menuHerramientas.add(btnDeshacer);
-        this.menuHerramientas.add(btnRehacer);
         this.menuHerramientas.add(btnCortar);
         this.menuHerramientas.add(btnCopiar);
         this.menuHerramientas.add(btnPegar);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
+        this.menuHerramientas.add(btnDeshacer);
+        this.menuHerramientas.add(btnRehacer);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnNegrita);
         this.menuHerramientas.add(btnCursiva);
         this.menuHerramientas.add(btnSubrayado);
+        this.menuHerramientas.add(btnTachado);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnSubindice);
         this.menuHerramientas.add(btnSuperindice);
-        this.menuHerramientas.add(btnResaltado);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         this.menuHerramientas.add(btnIzqda);
         this.menuHerramientas.add(btnCentro);
         this.menuHerramientas.add(btnDerecha);
-        this.menuHerramientas.add(btnJustificado);       
+        this.menuHerramientas.add(btnJustificado);
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
-        
+        this.menuHerramientas.add(btnColor);
+        this.menuHerramientas.add(btnResaltado);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
+        this.menuHerramientas.add(btnBuscar);
+        this.menuHerramientas.add(btnImprimir);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
+        this.menuHerramientas.add(selectorFuente);
+        this.menuHerramientas.add(selectorTamano);
+        this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         
         //Agregamos tooltips para cuando el usuario haga hover sobre los botones:
         btnNuevo.setToolTipText("Nuevo documento (CTRL + N)");
         btnAbrir.setToolTipText("Abrir documento (CTRL + O)");
         btnGuardar.setToolTipText("Guardar documento (CTRL + S)");
-        btnGuardarComo.setToolTipText("Guardar como...");        
-        btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
-        btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
+        btnGuardarComo.setToolTipText("Guardar como...");
+        btnGuardarTXT.setToolTipText("Guardar como documento de texto TXT");
+        btnGuardarPDF.setToolTipText("Guardar como archivo PDF");
         btnCortar.setToolTipText("Cortar (CTRL + X)");
         btnCopiar.setToolTipText("Copiar (CTRL + C)");
         btnPegar.setToolTipText("Pegar (CTRL + V)");
+        btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
+        btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
+        btnImagen.setToolTipText("Insertar imagen");
+        btnTabla.setToolTipText("Insertar tabla");
+        btnURL.setToolTipText("Insertar hiperenlace");
+        btnBuscar.setToolTipText("Buscar en texto");
+        btnImprimir.setToolTipText("Mandar documento a la impresora");
         btnNegrita.setToolTipText("Negrita (CTRL + B)");
         btnCursiva.setToolTipText("Cursiva (CTRL + I)");
         btnSubrayado.setToolTipText("Subrayado (CTRL + U)");
-        btnResaltado.setToolTipText("Resaltado");
+        btnTachado.setToolTipText("Tachado");
         btnSubindice.setToolTipText("Subíndice (CTRL + '-')");
         btnSuperindice.setToolTipText("Superíndice (CTRL + '+')");
         btnIzqda.setToolTipText("Alinear a la izquierda (CTRL + Q)");
         btnCentro.setToolTipText("Centrar (CTRL + T)");
         btnDerecha.setToolTipText("Alinear a la derecha (CTRL + D)");
         btnJustificado.setToolTipText("Justificar (CTRL + J)");
-        btnSelectorColor.setToolTipText("Color de fuente");
+        btnColor.setToolTipText("Color de fuente");
+        btnResaltado.setToolTipText("Color de fondo de carácter");
         selectorTamano.setToolTipText("Tamaño de fuente");
         selectorFuente.setToolTipText("Tipo de fuente");
         
@@ -335,28 +397,12 @@ public class PanelEditor extends JPanel
             this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.INDEFINIDO);
         });
         
-        btnDeshacer.addActionListener((ActionEvent e) -> {
-            this.handler.deshacerCambios(this.getIndicePestana());
+        btnGuardarTXT.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.TXT);
         });
         
-        btnRehacer.addActionListener((ActionEvent e) -> {
-            this.handler.rehacerCambios(this.getIndicePestana());
-        });
-        
-        btnSubindice.addActionListener((ActionEvent e) -> {
-            this.handler.escribirSubindice(this.getIndicePestana());
-        });
-        
-        btnSuperindice.addActionListener((ActionEvent e) -> {
-            this.handler.escribirSuperindice(this.getIndicePestana());
-        });
-        
-        btnSelectorColor.addActionListener((ActionEvent e) -> {
-            this.handler.cambiarColorTexto(this.getIndicePestana());
-        });
-        
-        btnResaltado.addActionListener((ActionEvent e) -> {
-            this.handler.cambiarColorResaltado(this.getIndicePestana());
+        btnGuardarPDF.addActionListener((ActionEvent e) -> {
+            this.handler.guardarDocumentoComo(this.panelPestanas, ExtensionesFormatosSoportados.PDF);
         });
         
         btnCortar.addActionListener((ActionEvent e) -> {
@@ -371,40 +417,74 @@ public class PanelEditor extends JPanel
             this.handler.pegarTexto(this.getIndicePestana());
         });
         
-        btnNegrita.addActionListener((ActionEvent e) -> {
-            this.handler.escribirNegrita(this.getIndicePestana());
+        btnDeshacer.addActionListener((ActionEvent e) -> {
+            this.handler.deshacerCambios(this.getIndicePestana());
         });
         
-        btnCursiva.addActionListener((ActionEvent e) -> {
-            this.handler.escribirCursiva(this.getIndicePestana());
+        btnRehacer.addActionListener((ActionEvent e) -> {
+            this.handler.rehacerCambios(this.getIndicePestana());
         });
         
-        btnSubrayado.addActionListener((ActionEvent e) -> {
-            this.handler.escribirSubrayado(this.getIndicePestana());
+        btnImagen.addActionListener((ActionEvent e) -> {
+            this.handler.insertarImagen(this.getIndicePestana());
         });
         
-        btnIzqda.addActionListener((ActionEvent e) -> {
-            this.handler.alinearTextoIzquierda(this.getIndicePestana());
+        btnTabla.addActionListener((ActionEvent e) -> {
+            this.handler.insertarTabla(this.getIndicePestana(), 
+                                       this.selectorFuente.getSelectedItem(), 
+                                       this.selectorTamano.getValue());
         });
         
-        btnCentro.addActionListener((ActionEvent e) -> {
-            this.handler.centrarTexto(this.getIndicePestana());
+        btnURL.addActionListener((ActionEvent e) -> {
+            this.handler.insertarHiperenlace(this.getIndicePestana());
         });
         
-        btnDerecha.addActionListener((ActionEvent e) -> {
-            this.handler.alinearTextoDerecha(this.getIndicePestana());
+        btnBuscar.addActionListener((ActionEvent e) -> {
+            this.handler.buscarEnTexto(this.getIndicePestana());
         });
         
-        btnJustificado.addActionListener((ActionEvent e) -> {
-            this.handler.justificarTexto(this.getIndicePestana());
+        btnImprimir.addActionListener((ActionEvent e) -> {
+            if (!this.handler.getListaDocumentos().isEmpty())
+                this.handler.imprimirDocumento(this.panelPestanas.getPanelDocumentoActivo());
+        });
+        
+        btnNegrita.addActionListener(new StyledEditorKit.BoldAction());        
+        btnCursiva.addActionListener(new StyledEditorKit.ItalicAction());        
+        btnSubrayado.addActionListener(new StyledEditorKit.UnderlineAction());
+        
+        btnTachado.addActionListener((ActionEvent e) -> {
+            this.handler.tacharTexto(this.getIndicePestana());
+        });
+                
+        btnSubindice.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSubindice(this.getIndicePestana());
+        });
+        
+        btnSuperindice.addActionListener((ActionEvent e) -> {
+            this.handler.escribirSuperindice(this.getIndicePestana());
+        });
+        
+        btnIzqda.addActionListener(new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT));        
+        btnCentro.addActionListener(new StyledEditorKit.AlignmentAction("Centrado", StyleConstants.ALIGN_CENTER));       
+        btnDerecha.addActionListener(new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT));        
+        btnJustificado.addActionListener(new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED));
+        
+        btnColor.addActionListener((ActionEvent e) -> {
+            this.handler.cambiarColorTexto(this.getIndicePestana());
+        });
+        
+        btnResaltado.addActionListener((ActionEvent e) -> {
+            this.handler.cambiarColorResaltado(this.getIndicePestana());
         });
         
         selectorFuente.addItemListener((ItemEvent ie) -> {
-            this.handler.cambiarFuente(this.getIndicePestana(), selectorFuente.getSelectedItem());
+            if (!this.handler.getListaDocumentos().isEmpty())
+                this.handler.cambiarFuente(this.getIndicePestana(), selectorFuente.getSelectedItem());
         });
         
         selectorTamano.addChangeListener((ChangeEvent ce) -> {
-            this.handler.cambiarTamanoFuente(this.getIndicePestana(), selectorTamano.getValue());
+            if (!this.handler.getListaDocumentos().isEmpty())
+                this.handler.cambiarTamanoFuente(this.getIndicePestana(), selectorTamano.getValue());
         });
     }
     
@@ -484,17 +564,9 @@ public class PanelEditor extends JPanel
         JMenuItem itemSubindice = new JMenuItem("Subíndice");
         JMenuItem itemSuperindice = new JMenuItem("Superíndice");
         
-        itemNegrita.addActionListener((ActionEvent e) -> {
-            this.handler.escribirNegrita(this.getIndicePestana());
-        });
-        
-        itemCursiva.addActionListener((ActionEvent e) -> {
-            this.handler.escribirCursiva(this.getIndicePestana());
-        });
-        
-        itemSubrayado.addActionListener((ActionEvent e) -> {
-            this.handler.escribirSubrayado(this.getIndicePestana());
-        });
+        itemNegrita.addActionListener(new StyledEditorKit.BoldAction());        
+        itemCursiva.addActionListener(new StyledEditorKit.ItalicAction());        
+        itemSubrayado.addActionListener(new StyledEditorKit.UnderlineAction());
         
         itemTachado.addActionListener((ActionEvent e) -> {
                 this.handler.tacharTexto(this.getIndicePestana());
@@ -523,21 +595,10 @@ public class PanelEditor extends JPanel
         JMenuItem itemCentro = new JMenuItem("Centrado");
         JMenuItem itemJustificado = new JMenuItem("Justificado");
         
-        itemIzqda.addActionListener((ActionEvent e) -> {
-            this.handler.alinearTextoIzquierda(this.getIndicePestana());
-        });
-        
-        itemCentro.addActionListener((ActionEvent e) -> {
-            this.handler.centrarTexto(this.getIndicePestana());
-        });
-        
-        itemDcha.addActionListener((ActionEvent e) -> {
-            this.handler.alinearTextoDerecha(this.getIndicePestana());
-        });
-        
-        itemJustificado.addActionListener((ActionEvent e) -> {
-            this.handler.justificarTexto(this.getIndicePestana());
-        });
+        itemIzqda.addActionListener(new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT));        
+        itemCentro.addActionListener(new StyledEditorKit.AlignmentAction("Centrado", StyleConstants.ALIGN_CENTER));        
+        itemDcha.addActionListener(new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT));        
+        itemJustificado.addActionListener(new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED));
         
         menuAlineacion.add(itemIzqda);
         menuAlineacion.add(itemDcha);
@@ -627,27 +688,9 @@ public class PanelEditor extends JPanel
             }
         };
         
-        Action accionNegrita = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                handler.escribirNegrita(getIndicePestana());
-            }
-            
-        };
-        
-        Action accionCursiva = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                handler.escribirCursiva(getIndicePestana());
-            }           
-        };
-        
-        Action accionSubrayar = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                handler.escribirSubrayado(getIndicePestana());
-            }            
-        };
+        Action accionNegrita = new StyledEditorKit.BoldAction();        
+        Action accionCursiva = new StyledEditorKit.ItalicAction();        
+        Action accionSubrayar = new StyledEditorKit.UnderlineAction();
         
         Action accionTachar = new AbstractAction() {
             @Override
@@ -713,33 +756,10 @@ public class PanelEditor extends JPanel
             }
         };
         
-        Action accionAlinearIzda = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                handler.alinearTextoIzquierda(getIndicePestana());
-            }            
-        };
-        
-        Action accionAlinearDcha = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                handler.alinearTextoDerecha(getIndicePestana());
-            }            
-        };
-        
-        Action accionCentrar = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                handler.centrarTexto(getIndicePestana());
-            }            
-        };
-        
-        Action accionJustificar = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                handler.justificarTexto(getIndicePestana());
-            }            
-        };
+        Action accionAlinearIzda = new StyledEditorKit.AlignmentAction("Izquierda", StyleConstants.ALIGN_LEFT);        
+        Action accionAlinearDcha = new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT);        
+        Action accionCentrar = new StyledEditorKit.AlignmentAction("Centrado", StyleConstants.ALIGN_CENTER);        
+        Action accionJustificar = new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED);
         
         //Asignamos los atajos de teclado al manejador mediante el mapa de entrada:
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoSeleccionTodo, "seleccionarTodo");        
@@ -756,7 +776,8 @@ public class PanelEditor extends JPanel
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoTachado, "tachado");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoCortar, "cortar");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoCopiar, "copiar");
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoPegar, "pegar");
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoPegar, "pegar");        
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoResaltado, "resaltar");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoAlinearIzqda, "alinearIzda");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoAlinearDcha, "alinearDcha");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoCentrar, "centrar");
@@ -777,7 +798,8 @@ public class PanelEditor extends JPanel
         this.getActionMap().put("tachado", accionTachar);
         this.getActionMap().put("cortar", accionCortar);
         this.getActionMap().put("copiar", accionCopiar);
-        this.getActionMap().put(("pegar"), accionPegar);
+        this.getActionMap().put("pegar", accionPegar);
+        this.getActionMap().put("resaltar", accionResaltar);
         this.getActionMap().put("alinearIzda", accionAlinearIzda);
         this.getActionMap().put("alinearDcha", accionAlinearDcha);
         this.getActionMap().put("centrar", accionCentrar);
@@ -789,11 +811,6 @@ public class PanelEditor extends JPanel
     public JMenuBar getBarraNavegacion()
     {
         return this.barraNavegacion;
-    }
-    
-    public JToolBar getMenuHerramientas()
-    {
-        return this.menuHerramientas;
     }
     
     public PanelConPestanasCerrable getPanelPestanas()
