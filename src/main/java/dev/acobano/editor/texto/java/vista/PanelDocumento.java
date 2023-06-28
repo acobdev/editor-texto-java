@@ -17,13 +17,17 @@ import javax.swing.undo.UndoManager;
  */
 public class PanelDocumento extends JPanel implements Printable
 {
-    //ATRIBUTOS:
+    /*******************/
+    /***  ATRIBUTOS  ***/
+    /*******************/
     //Componentes del panel:
     private JScrollPane barraDeslizable;
     private JTextPane documento;
     private TextLineNumber tln;
     
-    //CONSTRUCTOR:
+    /*********************/
+    /***  CONSTRUCTOR  ***/
+    /*********************/
     public PanelDocumento(JTextPane doc, UndoManager manager, JLabel etqCursor, JLabel etqDoc, JPopupMenu menuContextual)
     {
         //Setteamos el layout del panel:
@@ -66,13 +70,32 @@ public class PanelDocumento extends JPanel implements Printable
             int contadorLineas = root.getElementCount();
             int contadorPalabras = this.documento.getText().split("\\s+").length;
             
-            etqCursor.setText("   Línea: " + numeroLineaCursor +
-                              "  -  Columna: " + numColumnaCursor + 
-                              "  -  Posición: " + posicionCursor);
+            etqCursor.setText("    LÍNEA: " + numeroLineaCursor +
+                              "  |  COLUMNA: " + numColumnaCursor + 
+                              "  |  POSICIÓN: " + (posicionCursor + 1));
             
-            etqDoc.setText(contadorLineas + " línea(s)  -  " +
-                           contadorCaracteres + " caracteres  -  " +
-                           contadorPalabras + " palabras   ");
+            String textoEtqDocumento = String.valueOf(contadorLineas);
+            
+            if (contadorLineas == 1)
+                textoEtqDocumento += " línea  |  ";
+            else
+                textoEtqDocumento += " líneas  |  ";
+            
+            textoEtqDocumento += String.valueOf(contadorCaracteres);
+            
+            if (contadorCaracteres == 1)
+                textoEtqDocumento += " carácter  |  ";
+            else
+                textoEtqDocumento += " caracteres  |  ";
+            
+            textoEtqDocumento += String.valueOf(contadorPalabras);
+            
+            if (contadorPalabras == 1)
+                textoEtqDocumento += " palabra    ";
+            else
+                textoEtqDocumento += " palabras    ";
+            
+            etqDoc.setText(textoEtqDocumento);
         });
         
         //Agregamos un MouseListener para que aparezca el JPopupMenu al hacer click derecho:
@@ -88,12 +111,23 @@ public class PanelDocumento extends JPanel implements Printable
         this.add(this.barraDeslizable);
     }
     
-    //MÉTODOS 'GETTERS':
+    /***************************/
+    /***  MÉTODOS 'GETTERS'  ***/
+    /***************************/
+    
+    /**
+     * Método 'getter' que devuelve la barra deslizable del panel.
+     * @return Componente JScrollPane
+     */
     public JScrollPane getBarraDeslizable()
     {
         return this.barraDeslizable;
     }
     
+    /**
+     * Método 'getter' que devuelve el documento de texto del panel.
+     * @return Componente JTextPane.
+     */
     public JTextPane getDocumento()
     {
         return this.documento;
@@ -115,6 +149,10 @@ public class PanelDocumento extends JPanel implements Printable
         }
     }
     
+    /**
+     * Método 'getter' que devuelve un formato de página especificado A4.
+     * @return Objeto de la clase PageFormat.
+     */
     public PageFormat getFormatoA4()
     {
         PageFormat pf = new PageFormat();

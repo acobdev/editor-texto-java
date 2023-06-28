@@ -1,7 +1,6 @@
 package dev.acobano.editor.texto.java.vista;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.beans.*;
 import java.util.HashMap;
 import javax.swing.*;
@@ -18,7 +17,7 @@ import javax.swing.text.*;
  *  This class was designed to be used as a component added to the row header
  *  of a JScrollPane.
  * 
- * @see https://tips4java.wordpress.com/2009/05/23/text-component-line-number/
+ * https://tips4java.wordpress.com/2009/05/23/text-component-line-number/
  */
 public class TextLineNumber extends JPanel
 	implements CaretListener, DocumentListener, PropertyChangeListener
@@ -165,14 +164,12 @@ public class TextLineNumber extends JPanel
 	}
 
 	/**
-	 *  Specify the horizontal alignment of the digits within the component.
-	 *  Common values would be:
-	 *  <ul>
-	 *  <li>TextLineNumber.LEFT
-	 *  <li>TextLineNumber.CENTER
-	 *  <li>TextLineNumber.RIGHT (default)
-	 *	</ul>
-	 *  @param currentLineForeground  the Color used to render the current line
+	 *  Specify the horizontal alignment of the digits within the component.Common values would be:
+            <ul>
+                <li>TextLineNumber.LEFT
+                <li>TextLineNumber.CENTER
+                <li>TextLineNumber.RIGHT (default)
+            </ul>
 	 */
 	public void setDigitAlignment(float digitAlignment)
 	{

@@ -9,14 +9,14 @@
     <!-- METADATOS (GAV) -->
     <groupId>dev.acobano</groupId>
     <artifactId>editor-texto-java</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     
     <!-- PROPIEDADES -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <exec.mainClass>dev.acobano.editor.texto.java.EditorTextoJava</exec.mainClass>
+        <exec.mainClass>dev.acobano.editor.texto.java.CobTextAplicacion</exec.mainClass>
     </properties>
     
     <!-- DEPENDENCIAS -->
@@ -61,4 +61,6 @@
         </dependency>
 
     </dependencies>
+    <name>CobText</name>
+    <description>Programa de edición de texto realizado empleando exclusivamente la librería de interfaces Java por defecto Swing.</description>
 </project>

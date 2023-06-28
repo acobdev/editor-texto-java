@@ -14,13 +14,15 @@ import javax.swing.text.*;  //API Java para algunos eventos de botón del menú.
  */
 public class PanelEditor extends JPanel
 {
-    //ATRIBUTOS:   
+    /*******************/
+    /***  ATRIBUTOS  ***/
+    /*******************/
+    
     //Componentes principales:
     private JMenuBar barraNavegacion;
     private JToolBar menuHerramientas;
     private PanelConPestanasCerrable panelPestanas;
     private JPanel piePagina;
-            //panelMenuHerramientas;
     private JPopupMenu menuContextual;
     
     //Componentes secundarios:
@@ -32,12 +34,16 @@ public class PanelEditor extends JPanel
     private GestorEventosEditor handler;
     
     
-    //CONSTANTES:
+    /********************/
+    /***  CONSTANTES  ***/
+    /********************/ 
     private static final String[] TIPOS_FUENTE = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     private static final Integer[] TAMANOS_FUENTE = {8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72};
     
     
-    //CONSTRUCTOR:
+    /**********************/
+    /***  CONSTRUCTOR   ***/
+    /**********************/
     public PanelEditor()
     {       
         //Hacemos que el panel se acomode al frame:
@@ -57,7 +63,14 @@ public class PanelEditor extends JPanel
     }
     
     
-    //MÉTODOS PRIVADOS DE INICIALIZACIÓN:
+    /********************************************/
+    /***  MÉTODOS PRIVADOS DE INICIALIZACIÓN  ***/
+    /********************************************/
+    
+    /**
+     * Método privado que inicializa todos los detalles referentes a la
+     * barra de navegación superior del editor de texto.
+     */
     private void inicializarBarraNavegacion()
     {
         //Inicializamos la barra de menuInsertar:
@@ -146,21 +159,23 @@ public class PanelEditor extends JPanel
         //JMenuItem - JMenu 'Insertar':
         JMenuItem itemImagen = new JMenuItem("Insertar imagen");
         JMenuItem itemTabla = new JMenuItem("Insertar tabla");
-        JMenuItem itemHiperenlace = new JMenuItem("Insertar hiperenlace");
+        JMenuItem itemURL = new JMenuItem("Insertar hiperenlace");
         
         menuInsertar.add(itemImagen);
         menuInsertar.add(itemTabla);
-        menuInsertar.add(itemHiperenlace);
+        menuInsertar.add(itemURL);
         
         //Instanciamos los eventos de click a los JMenuItems:
         itemNuevoBlanco.addActionListener((ActionEvent e) -> {
             this.handler.crearNuevoDocumento(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
-            this.handler.getListaDocumentos().get(this.getIndicePestana()).setFont(new Font(String.valueOf(this.selectorFuente.getSelectedItem()), Font.PLAIN, (Integer) this.selectorTamano.getValue()));
+            this.handler.cambiarFuente(this.getIndicePestana(), this.getFuenteSeleccionada());
+            this.handler.cambiarTamanoFuente(this.getIndicePestana(), this.getTamanoFuenteSeleccionado());
         });
         
         itemNuevoHTML.addActionListener((ActionEvent e) -> {
-            this.handler.crearDocumentoHTML(this.panelPestanas, this.piePagina, this.etqCursor, this.etqDocumento, this.menuContextual);
-            this.handler.getListaDocumentos().get(this.getIndicePestana()).setFont(new Font(String.valueOf(this.selectorFuente.getSelectedItem()), Font.PLAIN, (Integer) this.selectorTamano.getValue()));
+            this.handler.crearDocumentoHTML(PanelEditor.this.panelPestanas, PanelEditor.this.piePagina, PanelEditor.this.etqCursor, PanelEditor.this.etqDocumento, PanelEditor.this.menuContextual);
+            this.handler.cambiarFuente(this.getIndicePestana(), this.getFuenteSeleccionada());
+            this.handler.cambiarTamanoFuente(this.getIndicePestana(), this.getTamanoFuenteSeleccionado());
         });
         
         itemAbrir.addActionListener((ActionEvent e) -> {
@@ -198,6 +213,8 @@ public class PanelEditor extends JPanel
         
         itemEliminarTodos.addActionListener((ActionEvent e) -> {
             this.panelPestanas.removeAll();
+            this.etqCursor.setText("");
+            this.etqDocumento.setText("");
             this.handler.cerrarTodosDocumentos();
         });
         
@@ -243,11 +260,11 @@ public class PanelEditor extends JPanel
         
         itemTabla.addActionListener((ActionEvent e) -> {
             this.handler.insertarTabla(this.getIndicePestana(), 
-                                       this.selectorFuente.getSelectedItem(), 
-                                       this.selectorTamano.getValue());
+                                       this.getFuenteSeleccionada(), 
+                                       this.getTamanoFuenteSeleccionado());
         });
         
-        itemHiperenlace.addActionListener((ActionEvent e) -> {
+        itemURL.addActionListener((ActionEvent e) -> {
             this.handler.insertarHiperenlace(this.getIndicePestana());
         });
         
@@ -262,8 +279,34 @@ public class PanelEditor extends JPanel
         itemPegar.addActionListener((ActionEvent e) -> {
             this.handler.pegarTexto(this.getIndicePestana());
         });
+        
+        //Añadimos Accelerators a los items para indicar al usuario su atajo de teclado:
+        itemNuevoBlanco.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
+        itemAbrir.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+        itemGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+        itemImprimir.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK));
+        itemDeshacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
+        itemRehacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
+        itemCortar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK));
+        itemCopiar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+        itemPegar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
+        itemSeleccionTodo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
+        itemBuscar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
+        itemNegrita.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
+        itemCursiva.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
+        itemSubrayado.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_DOWN_MASK));
+        itemTachado.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK));
+        itemSubindice.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_DOWN_MASK));
+        itemSuperindice.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, InputEvent.CTRL_DOWN_MASK));
+        itemImagen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK));
+        itemTabla.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK));
+        itemURL.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK));
     }
         
+    /**
+     * Método privado que inicializa todos los detalles referentes al
+     * menú de botones con las herramientas del editor de texto.
+     */
     private void inicializarMenuHerramientas()
     {
         //Inicializamos el JToolBar:
@@ -349,7 +392,7 @@ public class PanelEditor extends JPanel
         this.menuHerramientas.add(new JSeparator(JSeparator.VERTICAL));
         
         //Agregamos tooltips para cuando el usuario haga hover sobre los botones:
-        btnNuevo.setToolTipText("Nuevo documento (CTRL + N)");
+        btnNuevo.setToolTipText("Nuevo documento en blanco (CTRL + N)");
         btnAbrir.setToolTipText("Abrir documento (CTRL + O)");
         btnGuardar.setToolTipText("Guardar documento (CTRL + S)");
         btnGuardarComo.setToolTipText("Guardar como...");
@@ -360,25 +403,25 @@ public class PanelEditor extends JPanel
         btnPegar.setToolTipText("Pegar (CTRL + V)");
         btnDeshacer.setToolTipText("Deshacer (CTRL + Z)");
         btnRehacer.setToolTipText("Rehacer (CTRL + Y)");
-        btnImagen.setToolTipText("Insertar imagen");
-        btnTabla.setToolTipText("Insertar tabla");
-        btnURL.setToolTipText("Insertar hiperenlace");
-        btnBuscar.setToolTipText("Buscar en texto");
-        btnImprimir.setToolTipText("Mandar documento a la impresora");
+        btnImagen.setToolTipText("Insertar imagen (CTRL + M)");
+        btnTabla.setToolTipText("Insertar tabla (CTRL + T)");
+        btnURL.setToolTipText("Insertar hiperenlace (CTRL + H)");
+        btnBuscar.setToolTipText("Buscar en texto (CTRL + F)");
+        btnImprimir.setToolTipText("Mandar documento a la impresora (CTRL + P)");
         btnNegrita.setToolTipText("Negrita (CTRL + B)");
         btnCursiva.setToolTipText("Cursiva (CTRL + I)");
         btnSubrayado.setToolTipText("Subrayado (CTRL + U)");
-        btnTachado.setToolTipText("Tachado");
-        btnSubindice.setToolTipText("Subíndice (CTRL + '-')");
-        btnSuperindice.setToolTipText("Superíndice (CTRL + '+')");
-        btnIzqda.setToolTipText("Alinear a la izquierda (CTRL + Q)");
-        btnCentro.setToolTipText("Centrar (CTRL + T)");
-        btnDerecha.setToolTipText("Alinear a la derecha (CTRL + D)");
+        btnTachado.setToolTipText("Tachado (CTRL + K)");
+        btnSubindice.setToolTipText("Subíndice (CTRL + Menos)");
+        btnSuperindice.setToolTipText("Superíndice (CTRL + Más)");
+        btnIzqda.setToolTipText("Alinear a la izquierda (CTRL + L)");
+        btnCentro.setToolTipText("Centrar (CTRL + Q)");
+        btnDerecha.setToolTipText("Alinear a la derecha (CTRL + R)");
         btnJustificado.setToolTipText("Justificar (CTRL + J)");
         btnColor.setToolTipText("Color de fuente");
-        btnResaltado.setToolTipText("Color de fondo de carácter");
-        selectorTamano.setToolTipText("Tamaño de fuente");
-        selectorFuente.setToolTipText("Tipo de fuente");
+        btnResaltado.setToolTipText("Color de fondo de carácter (CTRL + G)");
+        this.selectorTamano.setToolTipText("Tamaño de fuente");
+        this.selectorFuente.setToolTipText("Tipo de fuente");
         
         //Creamos los respectios eventos de botón:
         btnNuevo.addActionListener((ActionEvent e) -> {
@@ -431,8 +474,8 @@ public class PanelEditor extends JPanel
         
         btnTabla.addActionListener((ActionEvent e) -> {
             this.handler.insertarTabla(this.getIndicePestana(), 
-                                       this.selectorFuente.getSelectedItem(), 
-                                       this.selectorTamano.getValue());
+                                       this.getFuenteSeleccionada(), 
+                                       this.getTamanoFuenteSeleccionado());
         });
         
         btnURL.addActionListener((ActionEvent e) -> {
@@ -479,16 +522,19 @@ public class PanelEditor extends JPanel
         
         selectorFuente.addItemListener((ItemEvent ie) -> {
             if (!this.handler.getListaDocumentos().isEmpty())
-                this.handler.cambiarFuente(this.getIndicePestana(), selectorFuente.getSelectedItem());
+                this.handler.cambiarFuente(this.getIndicePestana(), getFuenteSeleccionada());
         });
         
         selectorTamano.addChangeListener((ChangeEvent ce) -> {
             if (!this.handler.getListaDocumentos().isEmpty())
-                this.handler.cambiarTamanoFuente(this.getIndicePestana(), selectorTamano.getValue());
+                this.handler.cambiarTamanoFuente(this.getIndicePestana(), getTamanoFuenteSeleccionado());
         });
     }
     
-    
+    /**
+     * Método privado que inicializa todos los detalles referentes al
+     * pie de página situado en la parte inferior del editor de texto.
+     */
     private void inicializarPiePagina()
     {
         //Inicializamos los componentes:
@@ -504,6 +550,11 @@ public class PanelEditor extends JPanel
         this.piePagina.setVisible(false);
     }
     
+    /**
+     * Método privado que inicializa todos los detalles referentes al
+     * panel central del editor de texto donde se encuentran las pestañas
+     * con los documentos.
+     */
     private void inicializarPanelPestanas()
     {
         int alturaPanel = Toolkit.getDefaultToolkit().getScreenSize().height -
@@ -516,6 +567,9 @@ public class PanelEditor extends JPanel
         this.panelPestanas.setSize(anchuraPanel, alturaPanel);
     }
     
+    /**
+     * Método privado que inicializa el layout del editor de texto.
+     */
     private void inicializarLayoutPanel()
     {
         //Creamos un nuevo objeto para definir el layout:
@@ -527,6 +581,11 @@ public class PanelEditor extends JPanel
         this.add(this.piePagina, BorderLayout.SOUTH);
     }
     
+    /**
+     * Método privado que inicializa todos los detalles referentes al
+     * menú contextual del editor de texto al hacer click derecho en cualquier
+     * documento abierto.
+     */
     private void inicializarMenuContextual()
     {
         //Inicializamos el componente JPopupMenu:
@@ -610,6 +669,7 @@ public class PanelEditor extends JPanel
         JMenuItem itemCortar = new JMenuItem("Cortar");
         JMenuItem itemCopiar = new JMenuItem("Copiar");
         JMenuItem itemPegar = new JMenuItem("Pegar");
+        JMenuItem itemSeleccion = new JMenuItem("Seleccionar todo");
         
         itemCortar.addActionListener((ActionEvent e) -> {
             this.handler.cortarTexto(this.getIndicePestana());
@@ -623,9 +683,15 @@ public class PanelEditor extends JPanel
             this.handler.pegarTexto(this.getIndicePestana());
         });
         
+        itemSeleccion.addActionListener((ActionEvent e) -> {
+            this.handler.seleccionarTexto(this.getIndicePestana());
+        });
+        
         menuPortapapeles.add(itemCortar);
         menuPortapapeles.add(itemCopiar);
         menuPortapapeles.add(itemPegar);
+        menuPortapapeles.add(new JSeparator(JSeparator.HORIZONTAL));
+        menuPortapapeles.add(itemSeleccion);
         
         //Insertamos los JMenuItem en el JPopupMenu:
         this.menuContextual.add(menuTipoLetra);
@@ -635,24 +701,32 @@ public class PanelEditor extends JPanel
         this.menuContextual.add(menuPortapapeles);
     }
     
+    /**
+     * Método privado que inicializa los atajos de teclado del editor de texto.
+     */
     private void inicializarAtajosTeclado()
     {
         //Instanciamos los atajos de teclado (CTRL + tecla):
         KeyStroke atajoSeleccionTodo = KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoNegrita = KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK);
-        KeyStroke atajoCopiar = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);
-        KeyStroke atajoAlinearDcha = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK);        
+        KeyStroke atajoCopiar = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK);      
+        KeyStroke atajoBuscar = KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoResaltado = KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK);
-        KeyStroke atajoTachado = KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoURL = KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoCursiva = KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK);
-        KeyStroke atajoJustificar = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoJustificar = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK);       
+        KeyStroke atajoTachado = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoAlinearIzqda = KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoImagen = KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoNuevo = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoAbrir = KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK);
-        KeyStroke atajoPegar = KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoImprimir = KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoCentrar = KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoAlinearDcha = KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK);    
         KeyStroke atajoGuardar = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK);
-        KeyStroke atajoAlinearIzqda = KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoTabla = KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoSubrayado =  KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_DOWN_MASK);
+        KeyStroke atajoPegar = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoCortar = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoRehacer = KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK);
         KeyStroke atajoDeshacer = KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK);
@@ -760,6 +834,43 @@ public class PanelEditor extends JPanel
         Action accionAlinearDcha = new StyledEditorKit.AlignmentAction("Derecha", StyleConstants.ALIGN_RIGHT);        
         Action accionCentrar = new StyledEditorKit.AlignmentAction("Centrado", StyleConstants.ALIGN_CENTER);        
         Action accionJustificar = new StyledEditorKit.AlignmentAction("Justificado", StyleConstants.ALIGN_JUSTIFIED);
+               
+        Action accionBuscar = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.buscarEnTexto(getIndicePestana());
+            }            
+        };
+        
+        Action accionImprimir = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.imprimirDocumento(panelPestanas.getPanelDocumentoActivo());
+            }            
+        };
+        
+        Action accionImagen = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.insertarImagen(getIndicePestana());
+            }            
+        };
+        
+        Action accionTabla = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.insertarTabla(getIndicePestana(), 
+                                      getFuenteSeleccionada(), 
+                                      getTamanoFuenteSeleccionado());
+            }            
+        };
+        
+        Action accionURL = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                handler.insertarHiperenlace(getIndicePestana());
+            }            
+        };
         
         //Asignamos los atajos de teclado al manejador mediante el mapa de entrada:
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoSeleccionTodo, "seleccionarTodo");        
@@ -782,6 +893,11 @@ public class PanelEditor extends JPanel
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoAlinearDcha, "alinearDcha");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoCentrar, "centrar");
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoJustificar, "justificar");
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoBuscar, "buscar");
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoImprimir, "imprimir");
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoImagen, "insertarImagen");
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoTabla, "insertarTabla");
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(atajoURL, "insertarHiperenlace");
         
         //Asignamos el manejador a la acción mediante el mapa de acciones:
         this.getActionMap().put("seleccionarTodo", accionSeleccionTodo);
@@ -804,27 +920,75 @@ public class PanelEditor extends JPanel
         this.getActionMap().put("alinearDcha", accionAlinearDcha);
         this.getActionMap().put("centrar", accionCentrar);
         this.getActionMap().put("justificar", accionJustificar);
+        this.getActionMap().put("buscar", accionBuscar);
+        this.getActionMap().put("imprimir", accionImprimir);
+        this.getActionMap().put("insertarImagen", accionImagen);
+        this.getActionMap().put("insertarTabla", accionTabla);
+        this.getActionMap().put("insertarHiperenlacw", accionURL);
     }
     
     
-    //MÉTODOS GETTERS:
+    /***************************/
+    /***  MÉTODOS 'GETTERS'  ***/
+    /***************************/
+    
+    /**
+     * Método 'getter' que llama a la barra de navegación del editor de texto.
+     * @return Componente JMenuBar.
+     */
     public JMenuBar getBarraNavegacion()
     {
         return this.barraNavegacion;
     }
     
+    /**
+     * Método 'getter' que llama al panel central de pestañas con documento
+     * del editor de texto.
+     * @return Componente heredado de JTabbedPane.
+     */
     public PanelConPestanasCerrable getPanelPestanas()
     {
         return this.panelPestanas;
     }
     
+    /**
+     * Método 'getter' que llama al menú contextual que aparece al hacer click
+     * derecho en cualquier documento activo.
+     * @return Componente JPopupMenu.
+     */
     public JPopupMenu getMenuContextual()
     {
         return this.menuContextual;
     }
     
+    /**
+     * Método 'getter' que devuelve el número de índice de la pestaña del 
+     * documento que se encuentra activo en el editor de texto en el momento
+     * de su llamada.
+     * @return Entero positivo.
+     */
     public int getIndicePestana()
     {
         return this.panelPestanas.getSelectedIndex();
+    }
+    
+    /**
+     * Método 'getter' que devuelve la fuente seleccionada en el JComboBox 
+     * situado en el menú de herramientas del editor de texto.
+     * @return Objeto Java.
+     */
+    public Object getFuenteSeleccionada()
+    {
+        return this.selectorFuente.getSelectedItem();
+    }
+    
+    /**
+     * Método 'getter' que devuelve el tamaño de fuente seleccionado en el JSpinner
+     * situado en el menú de herramientas del editor de texto.
+     * @return Objeto Java.
+     */
+    public Object getTamanoFuenteSeleccionado()
+    {
+        return this.selectorTamano.getValue();
     }
 }

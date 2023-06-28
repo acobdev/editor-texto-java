@@ -13,20 +13,47 @@ import javax.swing.undo.UndoManager;
  * @author Álvaro Cobano
  */
 public class PanelConPestanasCerrable extends JTabbedPane
-{  
-    //ATRIBUTO:
+{
+    /******************/
+    /***  ATRIBUTO  ***/
+    /******************/
     private ArrayList<JLabel> listaCabeceras;
-    private ArrayList<JLabel> listaDatosCursor;
-    private ArrayList<JLabel> listaDatosDocumento;
     
     
-    //CONSTRUCTOR:
+    /*********************/
+    /***  CONSTRUCTOR  ***/
+    /*********************/
     public PanelConPestanasCerrable()
     {
         super();
         this.listaCabeceras = new ArrayList<>();
-        this.listaDatosCursor = new ArrayList<>();
-        this.listaDatosDocumento = new ArrayList<>();
+    }
+ 
+    
+    /***************************/
+    /***  MÉTODOS 'GETTERS'  ***/
+    /***************************/
+    
+    /**
+     * Método 'getter' que devuelve la etiqueta de la cabecera de la pestaña
+     * activa en el momento de la llamada del editor de texto.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @return Componente JLabel.
+     */
+    public JLabel getLabelCabecera(int indicePestana)
+    {
+        return this.listaCabeceras.get(indicePestana);
+    }
+    
+    /**
+     * Método 'getter' que devuelve el panel del documento que se encuentra
+     * activo en el momento de la llamada del editor de texto.
+     * @return Panel Swing de la clase 'PanelDocumento'.
+     */
+    public PanelDocumento getPanelDocumentoActivo()
+    {
+        return (PanelDocumento) this.getComponentAt(this.getSelectedIndex());
     }
     
     
@@ -120,11 +147,5 @@ public class PanelConPestanasCerrable extends JTabbedPane
         cabeceraPestana.add(btnCerrar);
         
         this.setTabComponentAt(indicePestana, cabeceraPestana);
-    }
-    
-    //MÉTODO 'GETTER':    
-    public JLabel getLabelCabecera(int indice)
-    {
-        return this.listaCabeceras.get(indice);
     }
 }

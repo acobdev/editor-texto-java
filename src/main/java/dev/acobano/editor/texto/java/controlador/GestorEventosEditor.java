@@ -6,16 +6,12 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode;
 import org.apache.poi.xwpf.usermodel.*;
 
-import java.awt.*;
-import java.awt.print.*;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
-import java.util.logging.*;
-import javax.swing.*;
+import java.awt.*;          //API Java de interfaz básica (Abstract Window Toolkit)
+import java.awt.print.*;    //API Java para mandar el documento a la impresora.
+import java.io.*;           //API Java para lectura/escritura de datos. 
+import java.net.*;          //API Java para controlar hiperenlaces.
+import java.util.*;         //API Java con herramientas de uso común.
+import javax.swing.*;       //API Java de interfaz UI para el ususario.
 import javax.swing.border.LineBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -37,14 +33,18 @@ import org.odftoolkit.simple.TextDocument;
  */
 public class GestorEventosEditor 
 {   
-    //ATRIBUTOS:
+    /*******************/
+    /***  ATRIBUTOS  ***/
+    /*******************/
     private ArrayList<JTextPane> listaDocumentos;
     private ArrayList<File> listaArchivosAbiertos;
     private ArrayList<UndoManager> listaManager;
     private int contador;
     
     
-    //CONSTRUCTOR:
+    /*********************/
+    /***  CONSTRUCTOR  ***/
+    /*********************/
     public GestorEventosEditor()
     {
         this.listaDocumentos = new ArrayList<>();
@@ -54,19 +54,48 @@ public class GestorEventosEditor
     }
     
     
-    //MÉTODOS 'GETTERS':
+    /***************************/
+    /***  MÉTODOS 'GETTERS'  ***/
+    /***************************/
+    /**
+     * Método 'getter' que retorna la lista de documentos que se encuentran
+     * abiertos actualmente en el editor de texto.
+     * @return ArrayList de componentes JTextPane.
+     */
     public ArrayList<JTextPane> getListaDocumentos()
     {
         return this.listaDocumentos;
     }
     
+    /**
+     * Método 'getter' que retorna la lista de ficheros externos que se
+     * encuentran abiertos actualmente en el editor de texto.
+     * @return ArrayList de objetos de la clase File.
+     */
     public ArrayList<File> getListaArchivosAbiertos()
     {
         return this.listaArchivosAbiertos;
     }
     
     
-    //EVENTOS DE ACCIÓN:
+    /***************************/
+    /***  EVENTOS DE ACCIÓN  ***/
+    /***************************/
+    
+    /**
+     * Método que crea un nuevo documento en blanco en el editor de texto.
+     * @param panelPestanas Objeto de la clase heredada de JTabbedPane que 
+     * representa el panel central del editor donde se encuentran las pestañas 
+     * con los documentos abiertos.
+     * @param piePagina JPanel inferior del editor de texto.
+     * @param etqCursor JLabel insertado en el pie de página que informa al
+     * usuario de los datos relevantes a la situación del cursor.
+     * @param etqDoc JLabel insertado en el pie de página que informa al 
+     * usuario de los datos relevantes al número de caracteres y palabras
+     * escritos en el documento.
+     * @param menuContextual JPopupMenu que aparece al hacer click derecho
+     * sobre un documento abierto.
+     */
     public void crearNuevoDocumento(PanelConPestanasCerrable panelPestanas, 
                                     JPanel piePagina, 
                                     JLabel etqCursor, 
@@ -88,6 +117,20 @@ public class GestorEventosEditor
         this.listaManager.add(manager);
     }
     
+    /**
+     * Método que crea un nuevo documento en formato HTML en el editor de texto.
+     * @param panelPestanas Objeto de la clase heredada de JTabbedPane que 
+     * representa el panel central del editor donde se encuentran las pestañas 
+     * con los documentos abiertos.
+     * @param piePagina JPanel inferior del editor de texto.
+     * @param etqCursor JLabel insertado en el pie de página que informa al
+     * usuario de los datos relevantes a la situación del cursor.
+     * @param etqDoc JLabel insertado en el pie de página que informa al 
+     * usuario de los datos relevantes al número de caracteres y palabras
+     * escritos en el documento.
+     * @param menuContextual JPopupMenu que aparece al hacer click derecho
+     * sobre un documento abierto.
+     */
     public void crearDocumentoHTML(PanelConPestanasCerrable panelPestanas, 
                                JPanel piePagina, 
                                JLabel etqCursor, 
@@ -124,7 +167,13 @@ public class GestorEventosEditor
             flujoEntrada.close();
             lectorArchivo.close();
         }
-        catch (Exception ex) {}
+        catch (Exception ex) 
+        {
+            JOptionPane.showMessageDialog(null, 
+                                              "Ha ocurrido un error inesperado en el proceso de creación del documento HTML.", 
+                                              "ERROR", 
+                                              JOptionPane.ERROR_MESSAGE);
+        }
         
         if (this.listaDocumentos.isEmpty())
             this.contador = 0;
@@ -137,12 +186,28 @@ public class GestorEventosEditor
         this.listaManager.add(manager);
     }
     
+    /**
+     * Método que permite coger el contenido de un fichero externo y vierte su
+     * contenido en el interior de un documento del editor.
+     * @param panelPestanas Objeto de la clase heredada de JTabbedPane que 
+     * representa el panel central del editor donde se encuentran las pestañas 
+     * con los documentos abiertos.
+     * @param piePagina JPanel inferior del editor de texto.
+     * @param etqCursor JLabel insertado en el pie de página que informa al
+     * usuario de los datos relevantes a la situación del cursor.
+     * @param etqDoc JLabel insertado en el pie de página que informa al 
+     * usuario de los datos relevantes al número de caracteres y palabras
+     * escritos en el documento.
+     * @param menuContextual JPopupMenu que aparece al hacer click derecho
+     * sobre un documento abierto.
+     */
     public void abrirDocumento(PanelConPestanasCerrable panelPestanas, 
                                JPanel piePagina, 
                                JLabel etqCursor, 
                                JLabel etqDoc,
                                JPopupMenu menuContextual)
     {
+        //Instanciamos un JFileChooser para que el usuario escoja el fichero a abrir:
         JFileChooser selectorArchivo = new JFileChooser();
         selectorArchivo.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         int resultado = selectorArchivo.showOpenDialog(null);
@@ -151,6 +216,7 @@ public class GestorEventosEditor
         {
             try
             {
+                //Una vez seleccionado, comprobamos si el archivo ha sido abierto anteriormente:
                 boolean existeArchivo = false;
                 File f = selectorArchivo.getSelectedFile();
                 
@@ -161,6 +227,7 @@ public class GestorEventosEditor
                         break;
                     }
                 
+                //En caso negativo, comenzamos el proceso de lectura e inserción en un documento:
                 if (!existeArchivo)
                 {
                     this.listaArchivosAbiertos.add(f);
@@ -169,7 +236,7 @@ public class GestorEventosEditor
                     PanelDocumento doc = new PanelDocumento(panelTexto, manager, etqCursor, etqDoc, menuContextual);
                     
                     //Empleamos un Input Stream para traer la información del archivo:
-                    FileReader lectorArchivo = new FileReader(f.getPath());
+                    FileReader lectorArchivo = new FileReader(f);
                     BufferedReader flujoEntrada = new BufferedReader(lectorArchivo);
                     String linea = "";
                     
@@ -184,7 +251,8 @@ public class GestorEventosEditor
                             d.insertString(d.getLength(), linea + "\n", null);
                         }
                     }
-                                        
+                          
+                    //Creamos una nueva pestaña en el editor de texto:
                     panelPestanas.crearPestana(f.getName(), 
                                                doc, 
                                                this.listaDocumentos, 
@@ -195,7 +263,10 @@ public class GestorEventosEditor
                     panelPestanas.setVisible(true);                    
                     this.listaDocumentos.add(panelTexto);
                     this.listaManager.add(manager);
+                    
+                    //Cerramos los flujos de entrada:
                     flujoEntrada.close();
+                    lectorArchivo.close();
                 }
                 else
                     JOptionPane.showMessageDialog(null, 
@@ -212,8 +283,6 @@ public class GestorEventosEditor
             } 
             catch (IOException | BadLocationException ex) 
             {
-                Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ex);
-                
                 JOptionPane.showMessageDialog(null, 
                                           "Ha ocurrido un error inesperado en el proceso de lectura.", 
                                           "ERROR", 
@@ -221,12 +290,20 @@ public class GestorEventosEditor
             }
         }
         else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null,
                                               "No ha seleccionado ningún archivo que abrir en este momento.",
                                               "AVISO",
                                               JOptionPane.INFORMATION_MESSAGE);
     }
     
+    /**
+     * Método que permite guardar un documento del editor en un archivo externo
+     * cuyo nombre y extensión deberá poner el usuario.
+     * @param panelPestanas Objeto de la clase heredada de JTabbedPane que 
+     * representa el panel central del editor donde se encuentran las pestañas 
+     * con los documentos abiertos.
+     */
     public void guardarDocumento(PanelConPestanasCerrable panelPestanas)
     {
         if (!this.listaDocumentos.isEmpty())
@@ -269,13 +346,23 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
+     /**
+      * Método que permite guardar un documento del editor en un archivo externo
+      * con una extensión definida como parámetro de entrada.
+      * @param panelPestanas Objeto de la clase heredada de JTabbedPane que 
+     * representa el panel central del editor donde se encuentran las pestañas 
+     * con los documentos abiertos.
+      * @param formato Enumerado que representa el tipo de extensión que poseerá
+      * el archivo a crear. Valores de entrada válidos: TXT (texto sin formato),
+      * RTF (texto con formato), PDF, DOCX (Microsoft Word), ODT (OpenOffice Writer),
+      * INDEFINIDO (para el botón 'Guardar como').
+      */
     public void guardarDocumentoComo(PanelConPestanasCerrable panelPestanas, ExtensionesFormatosSoportados formato)
     {
         if (!this.listaDocumentos.isEmpty())
         {
             //El usuario selecciona la ruta del archivo mediante un FileChooser:
             JFileChooser guardadorArchivo = new JFileChooser();
-            guardadorArchivo.setDialogTitle("Guardar como...");
         
             //Cambiamos el título y mensaje del FileChooser según el formato escogido:
             switch (formato)
@@ -395,12 +482,20 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    private void escribirArchivo(int indice, File ficheroAGuardar)
+    /**
+     * Método privado especializado que guarda en un archivo externo empleando
+     * el flujo de salida por defecto de Java.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param ficheroAGuardar Archivo externo donde se guardará la información
+     * del documento activo.
+     */
+    private void escribirArchivo(int indicePestana, File ficheroAGuardar)
     {
         try
         {
             //Recogemos el texto escrito en el documento a guardar:
-            String textoDocumento = this.listaDocumentos.get(indice).getText();
+            String textoDocumento = this.listaDocumentos.get(indicePestana).getText();
             
             //Instanciamos los streams de salida para los datos:
             FileWriter flujoSalida = new FileWriter(ficheroAGuardar);
@@ -409,14 +504,12 @@ public class GestorEventosEditor
             //Escribimos el texto en el fichero mediante el stream:
             buferMemoria.write(textoDocumento);
             
-            //Cerramos los streams:
+            //Cerramos los flujos de salida:
             buferMemoria.close();
             flujoSalida.close();
         }
         catch(IOException ioe)
         {
-            Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ioe);
-            
             JOptionPane.showMessageDialog(null, 
                                           "Ha ocurrido un error inesperado en el proceso de guardado.", 
                                           "ERROR", 
@@ -424,21 +517,27 @@ public class GestorEventosEditor
         }
     }
     
-    private void guardarComoRTF(int indice, File ficheroAGuardar)
+    /**
+     * Método privado especializado que guarda en un archivo externo empleando
+     * el flujo de salida de la librería de Java especializada en RTF.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param ficheroAGuardar Archivo externo donde se guardará la información
+     * del documento activo.
+     */
+    private void guardarComoRTF(int indicePestana, File ficheroAGuardar)
     {
         try
         {
             //Guardamos el contenido del JTextPane en formato RTF:
             RTFEditorKit editorKit = new RTFEditorKit();
-            StyledDocument doc = this.listaDocumentos.get(indice).getStyledDocument();
+            StyledDocument doc = this.listaDocumentos.get(indicePestana).getStyledDocument();
             FileOutputStream fos = new FileOutputStream(ficheroAGuardar);
             editorKit.write(fos, doc, 0, doc.getLength());
             fos.close();
         }
         catch (IOException | BadLocationException ex)
         {
-            Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ex);
-            
             JOptionPane.showMessageDialog(null, 
                                           "Ha ocurrido un error inesperado en el proceso de guardado.", 
                                           "ERROR", 
@@ -446,7 +545,15 @@ public class GestorEventosEditor
         }
     }
     
-    private void guardarComoPDF(int indice, File ficheroAGuardar)
+    /**
+     * Método privado especializado que guarda en un archivo PDF externo 
+     * empleando el flujo de salida de la libería externa Apache PDFBox.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param ficheroAGuardar Archivo externo donde se guardará la información
+     * del documento activo.
+     */
+    private void guardarComoPDF(int indicePestana, File ficheroAGuardar)
     {
         try
         {                
@@ -456,10 +563,13 @@ public class GestorEventosEditor
             doc.addPage(pagina);
             
             //Insertamos el contenido en la página PDF:
-            PDPageContentStream flujoContenido = new PDPageContentStream(doc, pagina, AppendMode.APPEND, true);
+            PDPageContentStream flujoContenido = new PDPageContentStream(doc, 
+                                                                         pagina,
+                                                                         AppendMode.APPEND, 
+                                                                         true);
             flujoContenido.beginText();
             flujoContenido.newLineAtOffset(50, 700);
-            flujoContenido.showText(this.listaDocumentos.get(indice).getText());
+            flujoContenido.showText(this.listaDocumentos.get(indicePestana).getText());
             flujoContenido.endText();
             flujoContenido.close();
                          
@@ -469,8 +579,6 @@ public class GestorEventosEditor
         }
         catch (IOException ioe)
         {
-            Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ioe);
-            
             JOptionPane.showMessageDialog(null, 
                                           "Ha ocurrido un error inesperado en el proceso de guardado.", 
                                           "ERROR", 
@@ -478,7 +586,15 @@ public class GestorEventosEditor
         }
     }
     
-    private void guardarComoDOCX(int indice, File ficheroAGuardar)
+    /**
+     * Método privado especializado que guarda en un archivo Microsoft Word externo 
+     * empleando el flujo de salida de la libería externa Apache POI.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param ficheroAGuardar Archivo externo donde se guardará la información
+     * del documento activo.
+     */
+    private void guardarComoDOCX(int indicePestana, File ficheroAGuardar)
     {
         try
         {
@@ -487,14 +603,15 @@ public class GestorEventosEditor
             XWPFDocument documento = new XWPFDocument();
             XWPFParagraph parrafo = documento.createParagraph();
             XWPFRun run = parrafo.createRun();
-            run.setText(this.listaDocumentos.get(indice).getText());
+            run.setText(this.listaDocumentos.get(indicePestana).getText());
             documento.write(fos);
+            
+            //Cerramos los flujos de salida:
+            documento.close();
             fos.close();
         }
         catch (IOException ioe)
         {
-            Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ioe);
-            
             JOptionPane.showMessageDialog(null, 
                                           "Ha ocurrido un error inesperado en el proceso de guardado.", 
                                           "ERROR", 
@@ -502,7 +619,15 @@ public class GestorEventosEditor
         }
     }
     
-    public void guardarComoODT(int indice, File ficheroAGuardar)
+    /**
+     * Método privado especializado que guarda en un archivo PDF externo 
+     * empleando el flujo de salida de la libería externa ODF Toolkit.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param ficheroAGuardar Archivo externo donde se guardará la información
+     * del documento activo.
+     */
+    public void guardarComoODT(int indicePestana, File ficheroAGuardar)
     {
         try
         {
@@ -510,15 +635,16 @@ public class GestorEventosEditor
             TextDocument doc = TextDocument.newTextDocument();
             
             //Agregamos el contenido del JTextPane al documento:
-            doc.addParagraph(this.listaDocumentos.get(indice).getText());
+            doc.addParagraph(this.listaDocumentos.get(indicePestana).getText());
             
             //Guardamos el documento como un archivo ODT:
             doc.save(ficheroAGuardar);
+            
+            //Cerramos el flujo de salida:
+            doc.close();
         }
         catch (Exception ex)
         {
-            Logger.getLogger(PanelEditor.class.getName()).log(Level.SEVERE, null, ex);
-            
             JOptionPane.showMessageDialog(null, 
                                           "Ha ocurrido un error inesperado en el proceso de guardado.", 
                                           "ERROR", 
@@ -526,12 +652,23 @@ public class GestorEventosEditor
         }
     }
     
-    public void deshacerCambios(int indice)
+    /**
+     * Método que deshace el último cambio realizado en el documento activo del editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void deshacerCambios(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
-            if (this.listaManager.get(indice).canUndo())
-                this.listaManager.get(indice).undo();
+            if (this.listaManager.get(indicePestana).canUndo())
+                this.listaManager.get(indicePestana).undo();
+            else
+                //En caso de no tener ningún archivo abierto, se avisa al usuario:
+                JOptionPane.showMessageDialog(null, 
+                                              "La cola para deshacer cambios en este documento ha llegado a su final.", 
+                                              "ERROR", 
+                                              JOptionPane.WARNING_MESSAGE);
         }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
@@ -541,12 +678,23 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void rehacerCambios(int indice)
+    /**
+     * Método que rehace el último cambio realizado en el documento activo del editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void rehacerCambios(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty()) 
         {
-            if (this.listaManager.get(indice).canRedo())
-                this.listaManager.get(indice).redo();
+            if (this.listaManager.get(indicePestana).canRedo())
+                this.listaManager.get(indicePestana).redo();
+            else
+                //En caso de no tener ningún archivo abierto, se avisa al usuario:
+                JOptionPane.showMessageDialog(null, 
+                                              "La cola para rehacer cambios en este documento ha llegado a su final.", 
+                                              "ERROR", 
+                                              JOptionPane.WARNING_MESSAGE);
         }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
@@ -556,12 +704,17 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void seleccionarTexto(int indice)
+    /**
+     * Método que selecciona la totalidad del texto existente en la pestaña
+     * activa del editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void seleccionarTexto(int indicePestana)
     {
         if (!this.listaManager.isEmpty())
-            this.listaDocumentos.get(indice).selectAll();
-        else
-            
+            this.listaDocumentos.get(indicePestana).selectAll();
+        else            
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
                                           "No hay ningún documento abierto actualmente que pueda ser modificado.", 
@@ -569,15 +722,21 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void cambiarColorTexto(int indice)
+    /**
+     * Método que permite cambiar el color de la fuente del texto seleccionado
+     * en el documento activo del editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void cambiarColorTexto(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
             //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indicePestana).getCharacterAttributes());
 
             //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
-            Color color = JColorChooser.showDialog(null, "Elija un color para la letra", this.listaDocumentos.get(indice).getSelectedTextColor());
+            Color color = JColorChooser.showDialog(null, "Elija un color para la letra", this.listaDocumentos.get(indicePestana).getSelectedTextColor());
 
             if (color != null)
             {
@@ -585,10 +744,10 @@ public class GestorEventosEditor
                 StyleConstants.setForeground(atributos, color);
 
                 //Damos los nuevos atributos al texto:
-                this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+                this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributos, false);
 
                 //Ponemos el foco en el documento para mejor UX:
-                this.listaDocumentos.get(indice).requestFocus();
+                this.listaDocumentos.get(indicePestana).requestFocus();
             }
             else
                 JOptionPane.showMessageDialog(null,
@@ -604,17 +763,23 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void cambiarColorResaltado(int indice)
+    /**
+     * Método que permite cambiar el color de la fuente del fondo del texto 
+     * seleccionado en el documento activo del editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void cambiarColorResaltado(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
             //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indicePestana).getCharacterAttributes());
 
             //Instanciamos un JColorChooser para que el usuario escoja un color de la paleta:
             Color color = JColorChooser.showDialog(null, 
                                                    "Elija un color para el resaltado", 
-                                                   this.listaDocumentos.get(indice).getSelectedTextColor());
+                                                   this.listaDocumentos.get(indicePestana).getSelectedTextColor());
 
             if (color != null)
             {
@@ -622,10 +787,10 @@ public class GestorEventosEditor
                 StyleConstants.setBackground(atributos, color);
 
                 //Damos los nuevos atributos al texto:
-                this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+                this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributos, false);
 
                 //Ponemos el foco en el documento para mejor UX:
-                this.listaDocumentos.get(indice).requestFocus();
+                this.listaDocumentos.get(indicePestana).requestFocus();
             }else
                 JOptionPane.showMessageDialog(null,
                                               "No ha seleccionado ningún color de la paleta para cambiar el color del resaltado.",
@@ -640,69 +805,73 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void cambiarFuente(int indice, Object nombreFuente)
+    /**
+     * Método que permite cambiar el tipo de fuente empleado en el texto 
+     * seleccionado del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param nombreFuente Objeto en cuyo interior se encuentra el nombre de la
+     * nueva fuente del texto seleccionado.
+     */
+    public void cambiarFuente(int indicePestana, Object nombreFuente)
     {
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+       //Obtenemos los atributos actuales del texto seleccionado:
+       SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indicePestana).getCharacterAttributes());
 
-            //Cambiamos la familia de la fuente del texto:
-            StyleConstants.setFontFamily(atributos, String.valueOf(nombreFuente));
+       //Cambiamos la familia de la fuente del texto:
+        StyleConstants.setFontFamily(atributos, String.valueOf(nombreFuente));
 
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+        //Damos los nuevos atributos al texto:
+        this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributos, false);
             
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
+        //Ponemos el foco en el documento para mejor UX:
+        this.listaDocumentos.get(indicePestana).requestFocus();
     }
     
-    public void cambiarTamanoFuente(int indice, Object tamanoFuente)
+    /**
+     * Método que permite cambiar el tamaño de letra en el texto seleccionado
+     * del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param tamanoFuente Objeto en cuyo interior se encuentra el nuevo tamaño
+     * de la fuente del texto seleccionado.
+     */
+    public void cambiarTamanoFuente(int indicePestana, Object tamanoFuente)
     {
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+        //Obtenemos los atributos actuales del texto seleccionado:
+        SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indicePestana).getCharacterAttributes());
 
-            //Cambiamos el tamaño de la fuente del texto:
-            StyleConstants.setFontSize(atributos, Integer.parseInt(String.valueOf(tamanoFuente)));
+        //Cambiamos el tamaño de la fuente del texto:
+        StyleConstants.setFontSize(atributos, Integer.parseInt(String.valueOf(tamanoFuente)));
 
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+        //Damos los nuevos atributos al texto:
+        this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributos, false);
             
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
+        //Ponemos el foco en el documento para mejor UX:
+        this.listaDocumentos.get(indicePestana).requestFocus();
     }
     
-    public void tacharTexto(int indice)
+    /**
+     * Método que permite insertar el estilo de tachado en el texto seleccionado
+     * del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void tacharTexto(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
             //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indicePestana).getCharacterAttributes());
 
             //Cambiamos el atributo para que tache el texto:
             StyleConstants.setStrikeThrough(atributos, true);
 
             //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
+            this.listaDocumentos.get(indicePestana).requestFocus();
         }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
@@ -712,7 +881,13 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void insertarImagen(int indice)
+    /**
+     * Método que permite insertar una imagen desde un fichero externo al
+     * documento activo en el editor de texto.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void insertarImagen(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
@@ -728,7 +903,7 @@ public class GestorEventosEditor
             {
                 File archivo = selectorImagen.getSelectedFile();
                 ImageIcon imagenAInsertar = new ImageIcon(archivo.getAbsolutePath());
-                this.listaDocumentos.get(indice).insertIcon(imagenAInsertar);
+                this.listaDocumentos.get(indicePestana).insertIcon(imagenAInsertar);
             }
             else
             JOptionPane.showMessageDialog(null, 
@@ -744,16 +919,26 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void insertarTabla(int indice, Object fuente, Object tamano)
+    /**
+     * Método que permite insertar una tabla con el número de filas y columnas
+     * definidas por el usuario en el documento activo en el editor de texto.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     * @param fuente Objeto en cuyo interior se encuentra el nombre de la
+     * nueva fuente del texto seleccionado.
+     * @param tamano Objeto en cuyo interior se encuentra el nuevo tamaño
+     * de la fuente del texto seleccionado.
+     */
+    public void insertarTabla(int indicePestana, Object fuente, Object tamano)
     {
         if (!this.listaDocumentos.isEmpty())
         {
             //En primer lugar, creamos un JOptionPane para saber el número de filas y columnas:
             JPanel panelDatos = new JPanel(new GridLayout(2, 2));
             JLabel etqFilas = new JLabel("Nº de filas: ");
-            JSpinner selectorFilas = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
+            JSpinner selectorFilas = new JSpinner(new SpinnerNumberModel(2, 1, Integer.MAX_VALUE, 1));
             JLabel etqColumnas = new JLabel("Nº de columnas: ");
-            JSpinner selectorColumnas = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
+            JSpinner selectorColumnas = new JSpinner(new SpinnerNumberModel(2, 1, Integer.MAX_VALUE, 1));
 
             panelDatos.add(etqFilas);
             panelDatos.add(selectorFilas);
@@ -781,7 +966,7 @@ public class GestorEventosEditor
                 tabla.getColumnModel().getColumn(0).setPreferredWidth(90);
                 
                 //Insertamos la tabla en el documento:
-                this.listaDocumentos.get(indice).insertComponent(tabla);
+                this.listaDocumentos.get(indicePestana).insertComponent(tabla);
             }
             else
                 JOptionPane.showMessageDialog(null, 
@@ -797,7 +982,13 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void insertarHiperenlace(int indice)
+    /**
+     * Método que permite insertar un hiperenlace en el documento activo
+     * del editor de texto.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void insertarHiperenlace(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
@@ -821,7 +1012,7 @@ public class GestorEventosEditor
                 if (!textoURL.equals(""))
                 {
                     //Creamos un HyperlinkListener y lo asignamos al JTextPane activo:
-                    this.listaDocumentos.get(indice).addHyperlinkListener(e -> {
+                    this.listaDocumentos.get(indicePestana).addHyperlinkListener(e -> {
                         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
                         {
                             String url = e.getURL().toString();
@@ -830,8 +1021,12 @@ public class GestorEventosEditor
                             {
                                 Desktop.getDesktop().browse(new URI(url));
                             } 
-                            catch (IOException | URISyntaxException ex) {
-                                Logger.getLogger(GestorEventosEditor.class.getName()).log(Level.SEVERE, null, ex);
+                            catch (IOException | URISyntaxException ex) 
+                            {
+                                JOptionPane.showMessageDialog(null, 
+                                          "Ha ocurrido un error inesperado en el proceso de lectura.", 
+                                          "ERROR", 
+                                          JOptionPane.ERROR_MESSAGE);
                             }
                         }
                     });
@@ -840,18 +1035,18 @@ public class GestorEventosEditor
                     SimpleAttributeSet atributo = new SimpleAttributeSet();
                     StyleConstants.setForeground(atributo, Color.BLUE);
                     StyleConstants.setUnderline(atributo, true);
-                    this.listaDocumentos.get(indice).setCharacterAttributes(atributo, false);
+                    this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributo, false);
                     
                     try {
-                        HyperlinkEvent evento = new HyperlinkEvent(this.listaDocumentos.get(indice),
+                        HyperlinkEvent evento = new HyperlinkEvent(this.listaDocumentos.get(indicePestana),
                                 HyperlinkEvent.EventType.ACTIVATED,
                                 new URL(textoURL));
                     
                         //Agregamos el hiperenlace:
-                        this.listaDocumentos.get(indice)
+                        this.listaDocumentos.get(indicePestana)
                                 .getStyledDocument()
                                 .insertString(this.listaDocumentos
-                                              .get(indice)
+                                              .get(indicePestana)
                                               .getStyledDocument()
                                               .getLength(),
                                         evento.getDescription(),
@@ -863,8 +1058,13 @@ public class GestorEventosEditor
                                                       "La URL que ha introducido no es válida.", 
                                                       "ERROR",
                                                       JOptionPane.ERROR_MESSAGE);
-                    } catch (BadLocationException ex) {
-                        Logger.getLogger(GestorEventosEditor.class.getName()).log(Level.SEVERE, null, ex);
+                    } 
+                    catch (BadLocationException ex) 
+                    {
+                        JOptionPane.showMessageDialog(null, 
+                                          "Ha ocurrido un error inesperado en el proceso de lectura.", 
+                                          "ERROR", 
+                                          JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 else
@@ -882,10 +1082,16 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void cortarTexto(int indice)
+    /**
+     * Método que permite cortar la sección de texto seleccionada 
+     * del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void cortarTexto(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
-            this.listaDocumentos.get(indice).cut();
+            this.listaDocumentos.get(indicePestana).cut();
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
@@ -894,10 +1100,16 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void copiarTexto(int indice)
+    /**
+     * Método que permite copiar la sección de texto seleccionada
+     * del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void copiarTexto(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
-            this.listaDocumentos.get(indice).copy();
+            this.listaDocumentos.get(indicePestana).copy();
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
@@ -906,10 +1118,16 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void pegarTexto(int indice)
+    /**
+     * Método que permite pegar la sección de texto seleccionada
+     * del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void pegarTexto(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
-            this.listaDocumentos.get(indice).paste();
+            this.listaDocumentos.get(indicePestana).paste();
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
@@ -918,189 +1136,27 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void alinearTextoIzquierda(int indice)
-    {
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-            
-            //Creamos el estilo de cursiva para el texto:
-            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_LEFT);
-
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void alinearTextoDerecha(int indice)
-    {
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-            
-            //Creamos el estilo de cursiva para el texto:
-            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_RIGHT);
-
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void centrarTexto(int indice)
+    /**
+     * Método que permite insertar el estilo de superindice en el texto seleccionado
+     * del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void escribirSuperindice(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
             //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-            
-            //Creamos el estilo de cursiva para el texto:
-            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_CENTER);
-
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void justificarTexto(int indice)
-    {
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-            
-            //Creamos el estilo de cursiva para el texto:
-            StyleConstants.setAlignment(atributos, StyleConstants.ALIGN_JUSTIFIED);
-
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void escribirNegrita(int indice)
-    {
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-            
-            //Creamos el estilo de cursiva para el texto:
-            StyleConstants.setBold(atributos, true);
-
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void escribirCursiva(int indice)
-    {        
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-            
-            //Creamos el estilo de cursiva para el texto:
-            StyleConstants.setItalic(atributos, true);
-
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void escribirSubrayado(int indice)
-    {
-        if (!this.listaArchivosAbiertos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
-            
-            //Creamos el estilo de subrayado para el texto:
-            StyleConstants.setUnderline(atributos, true);
-
-            //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
-            
-            //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
-        }
-        else
-            //En caso de no tener ningún archivo abierto, se avisa al usuario:
-            JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente que pueda ser modificado.", 
-                                          "ERROR", 
-                                          JOptionPane.WARNING_MESSAGE);
-    }
-    
-    public void escribirSuperindice(int indice)
-    {
-        if (!this.listaDocumentos.isEmpty())
-        {
-            //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indicePestana).getCharacterAttributes());
 
             //Creamos el estilo de superindice para el texto:
             StyleConstants.setSuperscript(atributos, true);
 
             //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
+            this.listaDocumentos.get(indicePestana).requestFocus();
         }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
@@ -1110,21 +1166,27 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void escribirSubindice(int indice)
+    /**
+     * Método que permite insertar el estilo de subindice en el texto seleccionado
+     * del documento activo en el editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void escribirSubindice(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
             //Obtenemos los atributos actuales del texto seleccionado:
-            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indice).getCharacterAttributes());
+            SimpleAttributeSet atributos = new SimpleAttributeSet(this.listaDocumentos.get(indicePestana).getCharacterAttributes());
 
             //Creamos el estilo de subindice para el texto:
             StyleConstants.setSubscript(atributos, true);
 
             //Damos los nuevos atributos al texto:
-            this.listaDocumentos.get(indice).setCharacterAttributes(atributos, false);
+            this.listaDocumentos.get(indicePestana).setCharacterAttributes(atributos, false);
             
             //Ponemos el foco en el documento para mejor UX:
-            this.listaDocumentos.get(indice).requestFocus();
+            this.listaDocumentos.get(indicePestana).requestFocus();
         }
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
@@ -1134,7 +1196,13 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
-    public void buscarEnTexto(int indice)
+    /**
+     * Método que permite buscar la cadena de texto a convenir por el usuario
+     * en el documento activo del editor.
+     * @param indicePestana Entero que representa el índice del documento cuya
+     * pestaña se encuentre seleccionada en el momento de la llamada.
+     */
+    public void buscarEnTexto(int indicePestana)
     {
         if (!this.listaDocumentos.isEmpty())
         {
@@ -1154,7 +1222,7 @@ public class GestorEventosEditor
             if (opcion == JOptionPane.OK_OPTION)
             {
                 String textoBuscar = textFieldBuscar.getText();
-                String textoDocumento = this.listaDocumentos.get(indice).getText();
+                String textoDocumento = this.listaDocumentos.get(indicePestana).getText();
                 
                 //En caso de que la palabra a buscar esté en el documento,
                 //la remarcaremos con el ratón para que el usuario la encuentre:
@@ -1162,8 +1230,8 @@ public class GestorEventosEditor
                 {
                     int cursorInicio = textoDocumento.indexOf(textoBuscar);
                     int cursorFinal = cursorInicio + textoBuscar.length();
-                    this.listaDocumentos.get(indice).select(cursorInicio, cursorFinal);
-                    this.listaDocumentos.get(indice).requestFocus();
+                    this.listaDocumentos.get(indicePestana).select(cursorInicio, cursorFinal);
+                    this.listaDocumentos.get(indicePestana).requestFocus();
                 }
                 else
                 JOptionPane.showMessageDialog(null, 
@@ -1182,11 +1250,16 @@ public class GestorEventosEditor
         else
             //En caso de no tener ningún archivo abierto, se avisa al usuario:
             JOptionPane.showMessageDialog(null, 
-                                          "No hay ningún documento abierto actualmente al que pueda buscar ningún texto.", 
+                                          "No hay ningún documento abierto actualmente en el que se pueda buscar ningún texto.", 
                                           "ERROR", 
                                           JOptionPane.WARNING_MESSAGE);
     }
     
+    /**
+     * Método que permite pasar por la impresora el documento activo del editor de texto.
+     * @param pDoc Panel donde se encuentra el documento activo del editor
+     * en el momento de la llamada del usuario.
+     */
     public void imprimirDocumento(PanelDocumento pDoc)
     {
         if (!this.listaDocumentos.isEmpty())
@@ -1223,11 +1296,24 @@ public class GestorEventosEditor
                                           JOptionPane.WARNING_MESSAGE);
     }
     
+    /**
+     * Método que cierra todas las pestañas activas en el editor de texto.
+     */
     public void cerrarTodosDocumentos()
     {
-        this.listaDocumentos.clear();
-        this.listaArchivosAbiertos.clear();
-        this.listaManager.clear();
-        this.contador = 1;
+        if (!this.listaDocumentos.isEmpty())
+        {
+            this.listaDocumentos.clear();
+            this.listaArchivosAbiertos.clear();
+            this.listaManager.clear();
+            this.contador = 1;
+        }
+        else
+            //En caso de no tener ningún archivo abierto, se avisa al usuario:
+            JOptionPane.showMessageDialog(null, 
+                                          "No hay ningún documento abierto actualmente en el editor.", 
+                                          "AVISO", 
+                                          JOptionPane.WARNING_MESSAGE);
+        
     }
 }

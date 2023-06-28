@@ -1,6 +1,5 @@
 package dev.acobano.editor.texto.java.vista;
 
-import java.awt.*;
 import javax.swing.*;
 
 /**
